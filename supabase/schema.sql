@@ -14,6 +14,7 @@ alter table public.game_state add column if not exists question_phase text not n
 alter table public.game_state add column if not exists betting_ends_at timestamptz;
 alter table public.game_state add column if not exists category_ends_at timestamptz;
 alter table public.game_state add column if not exists used_categories jsonb not null default '[]'::jsonb;
+alter table public.game_state add column if not exists used_questions jsonb not null default '[]'::jsonb;
 alter table public.game_state add column if not exists current_question text;
 alter table public.game_state add column if not exists correct_answer_index integer;
 alter table public.game_state add column if not exists settled_round integer not null default 0;

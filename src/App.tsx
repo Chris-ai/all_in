@@ -4,9 +4,9 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import './App.css'
 import gameData from './assets/data.json'
 
-type ScreenMode = 'registration' | 'game' | 'question'
+type ScreenMode = 'registration' | 'game' | 'question' | 'finished'
 type Player = { id: string; name: string; color: string; balance: number; eliminated: boolean; created_at: string }
-type GameState = { mode: ScreenMode; category_options: CategoryId[]; round_number: number; selected_category: CategoryId | null; question_phase: RoundPhase; betting_ends_at: string | null; category_ends_at: string | null; used_categories: CategoryId[]; current_question: string | null; correct_answer_index: number | null; settled_round: number }
+type GameState = { mode: ScreenMode; category_options: CategoryId[]; round_number: number; selected_category: CategoryId | null; question_phase: RoundPhase; betting_ends_at: string | null; category_ends_at: string | null; used_categories: CategoryId[]; used_questions: string[]; current_question: string | null; correct_answer_index: number | null; settled_round: number }
 type RoundPhase = 'betting' | 'locked' | 'review' | 'result'
 type QuestionBet = { player_id: string; round_number: number; amounts: number[] }
 const CategoryId = { FilmTv: 'film-tv', Music: 'music', World: 'world', ScienceNature: 'science-nature', FoodDrink: 'food-drink', PopCulture: 'pop-culture', WeirdFacts: 'weird-facts', Internet: 'internet' } as const
@@ -16,9 +16,17 @@ type GameQuestion = { id: string; question: string; answers: { id: string; text:
 type AnswerBet = { name: string; amount: number; color: string }
 const ALL_CATEGORIES = gameData.categories.map(({ id, name, icon }) => ({ id: id as CategoryId, name, icon }))
 const CATEGORY_COLORS = ['#7657ff', '#ff3f9b', '#20d5f2']
-function sampleCategories(excluded: CategoryId[]) {
+const BETTING_DURATION_SECONDS = 45
+function sampleCategories(excluded: CategoryId[], previous: CategoryId[] = []) {
   const available = ALL_CATEGORIES.filter((category) => !excluded.includes(category.id))
-  return [...available].sort(() => Math.random() - .5).slice(0, 3)
+  const pool = available.length >= 3 ? available : ALL_CATEGORIES
+  const previousKey = [...previous].sort().join('|')
+  let result: Category[] = []
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    result = [...pool].sort(() => Math.random() - .5).slice(0, 3)
+    if (result.map((category) => category.id).sort().join('|') !== previousKey) break
+  }
+  return result
 }
 function weightedPick(weights: number[]) {
   let cursor = Math.random() * weights.reduce((sum, weight) => sum + weight, 0)
@@ -84,7 +92,7 @@ function MobilePlayerView() {
   }, [])
   useEffect(() => {
     if (!supabaseReady) return
-    const refresh = () => supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,current_question,correct_answer_index,settled_round').then((rows) => { if (!rows[0]) return; setMode(rows[0].mode); setCategoryIds((current) => JSON.stringify(current) === JSON.stringify(rows[0].category_options ?? []) ? current : (rows[0].category_options ?? [])); const nextRound = rows[0].round_number ?? 0; if (nextRound !== roundNumberRef.current) { roundNumberRef.current = nextRound; setRoundNumber(nextRound); setSelectedVote(null) }; setSelectedCategoryId(rows[0].selected_category ?? null); setQuestionPhase(rows[0].question_phase ?? 'locked'); setCurrentQuestionId(rows[0].current_question ?? null) }).catch(() => setError('Brak połączenia z grą.'))
+    const refresh = () => supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,used_questions,current_question,correct_answer_index,settled_round').then((rows) => { if (!rows[0]) return; setMode(rows[0].mode); setCategoryIds((current) => JSON.stringify(current) === JSON.stringify(rows[0].category_options ?? []) ? current : (rows[0].category_options ?? [])); const nextRound = rows[0].round_number ?? 0; if (nextRound !== roundNumberRef.current) { roundNumberRef.current = nextRound; setRoundNumber(nextRound); setSelectedVote(null) }; setSelectedCategoryId(rows[0].selected_category ?? null); setQuestionPhase(rows[0].question_phase ?? 'locked'); setCurrentQuestionId(rows[0].current_question ?? null) }).catch(() => setError('Brak połączenia z grą.'))
     refresh(); const timer = window.setInterval(refresh, 1500); return () => window.clearInterval(timer)
   }, [])
   useEffect(() => {
@@ -144,6 +152,7 @@ function MobilePlayerView() {
   }
   if (restoring) return <main className="mobile-play"><div className="mobile-glow" /><section><div className="mobile-confirmed"><span className="mobile-waiting"><i /></span></div></section></main>
   if (!player) return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><section><span className="mobile-kicker">DOŁĄCZ DO GRY</span><h1>Jak masz na imię?</h1><p>Podaj nazwę, pod którą zobaczą Cię pozostali gracze.</p><form className="mobile-join" onSubmit={join}><label htmlFor="join-name">Twoje imię lub nazwa</label><input id="join-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={32} placeholder="np. Krzysiek" autoFocus /><button className="primary-button" disabled={busy} type="submit">{busy ? 'Dołączanie…' : 'Dołączam'} <span>→</span></button></form>{error && <p className="form-message">{error}</p>}</section></main>
+  if (mode === 'finished') return <main className="mobile-play mobile-results"><div className="mobile-glow" /><section><div className="mobile-results-heading"><h1>Ranking</h1></div><div className="mobile-ranking">{mobileRanking.map((item, index) => <div key={item.id} className={item.id === player.id ? 'is-me' : ''} style={{ '--player-color': item.color } as CSSProperties}><span>{index + 1}</span><i>{item.name.charAt(0)}</i><strong>{item.name}</strong><b>{item.balance.toLocaleString('pl-PL')} <small>PLN</small></b></div>)}</div></section></main>
   if (player.eliminated) return <main className="mobile-play mobile-results"><div className="mobile-glow" /><section><div className="mobile-results-heading"><h1>Ranking</h1></div><div className="mobile-ranking">{mobileRanking.map((item, index) => <div key={item.id} className={item.id === player.id ? 'is-me' : ''} style={{ '--player-color': item.color } as CSSProperties}><span>{index + 1}</span><i>{item.name.charAt(0)}</i><strong>{item.name}</strong><b>{item.balance.toLocaleString('pl-PL')} <small>PLN</small></b></div>)}</div></section></main>
   if (mode === 'game' && selectedCategoryId) { const chosen = ALL_CATEGORIES.find((category) => category.id === selectedCategoryId); return <main className="mobile-play"><div className="mobile-glow" /><div className="balance-notch"><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">WYLOSOWANA KATEGORIA</span><h1>{chosen?.name ?? selectedCategoryId}</h1><p>Pytanie pojawi się za chwilę.</p><span className="mobile-waiting"><i /></span></div></section></main> }
   if (mode === 'registration') return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><div className="balance-notch"><span>SALDO</span><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div style={{ background: player.color }}>{player.name.charAt(0)}</div><span className="mobile-kicker">JESTEŚ W GRZE</span><h1>{player.name}</h1><p>Gra niedługo się zacznie…</p><span className="mobile-waiting"><i /></span></div></section></main>
@@ -155,9 +164,10 @@ function MobilePlayerView() {
 function PlayerView() {
   const [openedDoors, setOpenedDoors] = useState<Set<number>>(() => new Set())
   const [phase, setPhase] = useState<RoundPhase>('betting')
-  const [secondsLeft, setSecondsLeft] = useState(60)
+  const [secondsLeft, setSecondsLeft] = useState(BETTING_DURATION_SECONDS)
   const [showCategory, setShowCategory] = useState(true)
   const [usedCategories, setUsedCategories] = useState<CategoryId[]>([])
+  const [usedQuestions, setUsedQuestions] = useState<string[]>([])
   const [categoryOptions, setCategoryOptions] = useState<Category[]>(() => sampleCategories([]))
   const [categoryPhase, setCategoryPhase] = useState<'voting' | 'drawing' | 'selected'>('voting')
   const [categorySeconds, setCategorySeconds] = useState(20)
@@ -175,6 +185,7 @@ function PlayerView() {
   const [hydrated, setHydrated] = useState(!supabaseReady)
   const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null)
   const [leaderboardOpen, setLeaderboardOpen] = useState(false)
+  const [gameFinished, setGameFinished] = useState(false)
   const activeQuestion = getQuestion(currentQuestionId)
   const questionAnswers = useMemo(() => {
     const playerById = new Map(players.map((player) => [player.id, player]))
@@ -193,7 +204,7 @@ function PlayerView() {
   const loadState = useCallback(async () => {
     if (!supabaseReady) return
     try {
-      const [people, states] = await Promise.all([supabaseRequest<Player[]>('players?select=id,name,color,balance,eliminated,created_at&order=balance.desc'), supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,current_question,correct_answer_index,settled_round')])
+      const [people, states] = await Promise.all([supabaseRequest<Player[]>('players?select=id,name,color,balance,eliminated,created_at&order=balance.desc'), supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,used_questions,current_question,correct_answer_index,settled_round')])
       setPlayers(people)
       const state = states[0]
       if (state) {
@@ -201,9 +212,11 @@ function PlayerView() {
         setBettingEndsAt(state.betting_ends_at ?? null)
         setCategoryEndsAt(state.category_ends_at ?? null)
         setUsedCategories(state.used_categories ?? [])
+        setUsedQuestions(state.used_questions ?? [])
         setCurrentQuestionId(state.current_question ?? null)
+        setGameFinished(state.mode === 'finished')
         setShowStart(state.mode === 'registration')
-        setShowCategory(state.mode !== 'question')
+        setShowCategory(state.mode === 'game')
         if (state.mode === 'question') {
           const restoredPhase = state.question_phase ?? 'locked'
           setPhase(restoredPhase)
@@ -280,39 +293,47 @@ function PlayerView() {
     const selectedCategory = categoryOptions[winningCategory]
     const nextUsedCategories = Array.from(new Set([...usedCategories, selectedCategory.id]))
     const categoryQuestions = gameData.categories.find((category) => category.id === selectedCategory.id)?.questions ?? []
-    const selectedQuestion = categoryQuestions[Math.floor(Math.random() * categoryQuestions.length)] as GameQuestion | undefined
+    const unusedQuestions = categoryQuestions.filter((question) => !usedQuestions.includes(question.id))
+    const questionPool = unusedQuestions.length ? unusedQuestions : categoryQuestions
+    const selectedQuestion = questionPool[Math.floor(Math.random() * questionPool.length)] as GameQuestion | undefined
     if (!selectedQuestion) return
+    const nextUsedQuestions = [...usedQuestions, selectedQuestion.id]
     setUsedCategories(nextUsedCategories)
+    setUsedQuestions(nextUsedQuestions)
     setCurrentQuestionId(selectedQuestion.id)
-    const deadline = new Date(Date.now() + 60_000).toISOString()
-    setSecondsLeft(60); setPhase('betting'); setBettingEndsAt(deadline); setQuestionBets([])
+    const deadline = new Date(Date.now() + BETTING_DURATION_SECONDS * 1000).toISOString()
+    setSecondsLeft(BETTING_DURATION_SECONDS); setPhase('betting'); setBettingEndsAt(deadline); setQuestionBets([])
     setShowCategory(false)
-    await supabaseRequest('game_state?id=eq.main', { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ mode: 'question', question_phase: 'betting', betting_ends_at: deadline, used_categories: nextUsedCategories, current_question: selectedQuestion.id, correct_answer_index: selectedQuestion.answers.findIndex((answer) => answer.correct), updated_at: new Date().toISOString() }) }).catch(() => undefined)
+    await supabaseRequest('game_state?id=eq.main', { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ mode: 'question', question_phase: 'betting', betting_ends_at: deadline, used_categories: nextUsedCategories, used_questions: nextUsedQuestions, current_question: selectedQuestion.id, correct_answer_index: selectedQuestion.answers.findIndex((answer) => answer.correct), updated_at: new Date().toISOString() }) }).catch(() => undefined)
   }
   async function startGame() {
     setShowStart(false)
     const nextRound = roundNumber + 1
     const deadline = new Date(Date.now() + 20_000).toISOString()
-    setRoundNumber(nextRound); setVotes([0, 0, 0]); setCategorySeconds(20); setCategoryPhase('voting'); setCategoryEndsAt(deadline); setUsedCategories([])
-    await supabaseRequest('game_state?id=eq.main', { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ mode: 'game', round_number: nextRound, category_options: categoryOptions.map((category) => category.id), selected_category: null, category_ends_at: deadline, used_categories: [], current_question: null, correct_answer_index: null, settled_round: 0, updated_at: new Date().toISOString() }) }).catch(() => undefined)
+    setRoundNumber(nextRound); setVotes([0, 0, 0]); setCategorySeconds(20); setCategoryPhase('voting'); setCategoryEndsAt(deadline); setUsedCategories([]); setUsedQuestions([])
+    await supabaseRequest('game_state?id=eq.main', { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ mode: 'game', round_number: nextRound, category_options: categoryOptions.map((category) => category.id), selected_category: null, category_ends_at: deadline, used_categories: [], used_questions: [], current_question: null, correct_answer_index: null, settled_round: 0, updated_at: new Date().toISOString() }) }).catch(() => undefined)
   }
   async function nextQuestion() {
-    setOpenedDoors(new Set()); setSecondsLeft(60); setPhase('betting')
-    const nextOptions = sampleCategories(usedCategories)
-    const chosenOptions = nextOptions.length === 3 ? nextOptions : sampleCategories([])
+    setOpenedDoors(new Set()); setSecondsLeft(BETTING_DURATION_SECONDS); setPhase('betting')
+    const chosenOptions = sampleCategories(usedCategories, categoryOptions.map((category) => category.id))
     const nextRound = roundNumber + 1
     const categoryDeadline = new Date(Date.now() + 20_000).toISOString()
     setRoundNumber(nextRound); setCategoryOptions(chosenOptions); setVotes([0, 0, 0]); setMyVote(null); setFocusedCategory(null); setWinningCategory(null); setCategorySeconds(20); setCategoryPhase('voting'); setShowCategory(true); setBettingEndsAt(null); setCategoryEndsAt(categoryDeadline); setQuestionBets([])
-    await supabaseRequest('game_state?id=eq.main', { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ mode: 'game', round_number: nextRound, category_options: chosenOptions.map((category) => category.id), selected_category: null, question_phase: 'locked', betting_ends_at: null, category_ends_at: categoryDeadline, used_categories: usedCategories, current_question: null, correct_answer_index: null, updated_at: new Date().toISOString() }) }).catch(() => undefined)
+    await supabaseRequest('game_state?id=eq.main', { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ mode: 'game', round_number: nextRound, category_options: chosenOptions.map((category) => category.id), selected_category: null, question_phase: 'locked', betting_ends_at: null, category_ends_at: categoryDeadline, used_categories: usedCategories, used_questions: usedQuestions, current_question: null, correct_answer_index: null, updated_at: new Date().toISOString() }) }).catch(() => undefined)
+  }
+  async function finishGame() {
+    setGameFinished(true)
+    await supabaseRequest('game_state?id=eq.main', { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ mode: 'finished', updated_at: new Date().toISOString() }) }).catch(() => undefined)
   }
   const leaderboard = <aside className={`leaderboard leaderboard-drawer ${leaderboardOpen ? 'is-open' : ''}`}><button className="leaderboard-toggle" type="button" onClick={() => setLeaderboardOpen((open) => !open)} aria-label={leaderboardOpen ? 'Zwiń ranking' : 'Pokaż ranking'} aria-expanded={leaderboardOpen}>{leaderboardOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}</button><header>Ranking</header><div>{DEMO_PLAYERS.map((item) => <div className="leader-row" key={item.id} style={{ '--player-color': item.color } as CSSProperties}><i>{item.name.charAt(0)}</i><div><strong title={item.name}>{item.name}</strong><small>{item.balance.toLocaleString('pl-PL')} PLN</small></div></div>)}</div></aside>
   if (!hydrated) return <main className="start-screen"><div className="stage-rays" /></main>
   if (showStart) return <main className="start-screen"><div className="stage-rays" /><section><div className="start-qr"><img src={startQrUrl} alt={`Kod QR prowadzący do ${playUrl}`} /></div><button type="button" onClick={startGame}>Rozpocznij grę <span>→</span></button></section></main>
+  if (gameFinished) return <main className="final-screen"><div className="stage-rays" /><section><h1>Ranking</h1><div className="final-ranking">{players.map((item, index) => <div key={item.id} style={{ '--player-color': item.color } as CSSProperties}><span>{index + 1}</span><i>{item.name.charAt(0)}</i><strong>{item.name}</strong><b>{item.balance.toLocaleString('pl-PL')} <small>PLN</small></b></div>)}</div></section></main>
   if (showCategory) return <main className="category-screen">{leaderboard}<section className="category-stage"><p>Wybierz kategorię</p><h1>Na co dziś stawiamy?</h1><div className={`category-ring ${categoryPhase === 'drawing' ? 'is-drawing' : ''}`}><svg className="ring-arcs" viewBox="0 0 100 100" aria-hidden="true">{categoryOptions.map((category, index) => <g key={category.id} transform={`rotate(${index * 120 - 90} 50 50)`}><circle className={`category-arc-track ${focusedCategory === index ? 'focused' : ''} ${winningCategory === index ? 'winner' : ''}`} cx="50" cy="50" r="43" pathLength="100" /><circle className={`category-arc-fill ${votes[index] > 0 ? 'has-votes' : ''} ${focusedCategory === index ? 'focused' : ''} ${winningCategory === index ? 'winner' : ''}`} style={{ '--category-color': CATEGORY_COLORS[index] } as CSSProperties} cx="50" cy="50" r="43" pathLength="100" /></g>)}</svg>{categoryOptions.map((category, index) => <button key={category.id} type="button" disabled={categoryPhase !== 'voting'} onClick={() => castVote(index)} className={`category-option option-${index} ${myVote === index ? 'my-vote' : ''}`}><span>{category.icon}</span><strong>{category.name}</strong><small>{votes[index]} {votes[index] === 1 ? 'głos' : 'głosów'}</small></button>)}<div className="ring-center">{categoryPhase === 'selected' ? <button className="start-question" type="button" onClick={startQuestion}><strong>Zaczynamy</strong><span>→</span></button> : <><strong>{categoryPhase === 'voting' ? categorySeconds : '•'}</strong><span>{categoryPhase === 'voting' ? 'sekund' : 'losowanie'}</span></>}</div></div></section></main>
   return <main className={`question-screen phase-${phase}`}><div className="stage-rays" />
-    {phase === 'betting' && <div className="betting-progress" style={{ transform: `scaleX(${secondsLeft / 60})` }} />}
+    {phase === 'betting' && <div className="betting-progress" style={{ transform: `scaleX(${secondsLeft / BETTING_DURATION_SECONDS})` }} />}
     {phase === 'review' && <div className="review-progress" />}
-    {phase === 'result' && <button className="next-question" type="button" onClick={nextQuestion}>NASTĘPNE PYTANIE <span>→</span></button>}
+    {phase === 'result' && <button className="next-question" type="button" onClick={roundNumber >= 10 ? finishGame : nextQuestion}>{roundNumber >= 10 ? 'ZAKOŃCZ' : 'NASTĘPNE PYTANIE'} <span>→</span></button>}
     {leaderboard}
     <section className="question-stage"><div className="question-banner"><span>{String(roundNumber || 1).padStart(2, '0')}</span><h1>{activeQuestion.question}</h1></div><div className="trapdoors">{questionAnswers.map((answer, index) => <div className={`answer-station ${openedDoors.has(index) ? 'is-open' : ''} ${answer.correct ? 'is-correct' : 'is-wrong'}`} key={answer.label}>
       <div className="answer-display"><span>{String.fromCharCode(65 + index)}</span><strong>{answer.label}</strong></div>

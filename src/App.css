@@ -1,4 +1,14 @@
 #root { min-height: 100svh; }
+.final-screen { min-height: 100svh; position: relative; overflow: hidden; display: grid; place-items: center; padding: 40px 20px; background: radial-gradient(circle at 50% 45%, #332171, #12103c 43%, #07061d 78%); }
+.final-screen > section { width: min(620px, 92vw); position: relative; z-index: 2; }
+.final-screen h1 { margin: 0 0 28px; color: white; font: 800 clamp(55px, 8vw, 92px)/.9 'Barlow Condensed', sans-serif; text-align: center; text-transform: uppercase; }
+.final-ranking { display: grid; gap: 10px; }
+.final-ranking > div { --player-color: #7657ff; min-height: 72px; display: grid; grid-template-columns: 34px 50px minmax(0,1fr) auto; align-items: center; gap: 14px; padding: 10px 18px; border: 1px solid color-mix(in srgb, var(--player-color), transparent 58%); border-radius: 20px; background: linear-gradient(90deg, color-mix(in srgb, var(--player-color), #130d35 73%), rgba(15,11,45,.82)); box-shadow: 0 12px 30px rgba(0,0,0,.2); }
+.final-ranking span { color: #a99fc0; font: 800 18px/1 'Barlow Condensed', sans-serif; text-align: center; }
+.final-ranking i { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; color: #100b25; background: var(--player-color); font: normal 800 17px/1 'Inter', sans-serif; box-shadow: 0 0 16px color-mix(in srgb, var(--player-color), transparent 45%); }
+.final-ranking strong { overflow: hidden; color: white; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.final-ranking b { color: var(--lime); font: 800 22px/1 'Barlow Condensed', sans-serif; white-space: nowrap; }
+.final-ranking small { color: #9b91ae; font-size: 8px; }
 .start-screen { min-height: 100svh; position: relative; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, #332171, #12103c 43%, #07061d 78%); }
 .start-screen > section { width: min(560px, 82vw); position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
 .start-qr { width: min(500px, 68vh, 78vw); padding: clamp(14px, 2vw, 22px); border: 2px solid #7d68ca; border-radius: 30px; background: white; box-shadow: 0 0 0 7px rgba(24,16,66,.9), 0 0 55px rgba(116,80,245,.4), 0 35px 90px rgba(0,0,0,.55); }
