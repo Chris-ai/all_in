@@ -6,6 +6,32 @@
       "icon": "🎬",
       "questions": [
         {
+          "id": "film-tv-03",
+          "question": "W której części Harry'ego Pottera po raz pierwszy pojawił się motyw muzyczny „Hedwig's Theme”?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Kamień Filozoficzny",
+              "correct": true
+            },
+            {
+              "id": "B",
+              "text": "Komnata Tajemnic",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Więzień Azkabanu",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Zakon Feniksa",
+              "correct": false
+            }
+          ]
+        },
+        {
           "id": "film-tv-01",
           "question": "Który z tych filmów miał premierę najwcześniej?",
           "answers": [
@@ -53,32 +79,6 @@
             {
               "id": "D",
               "text": "Mała Syrenka",
-              "correct": false
-            }
-          ]
-        },
-        {
-          "id": "film-tv-03",
-          "question": "W której części Harry'ego Pottera po raz pierwszy pojawił się motyw muzyczny „Hedwig's Theme”?",
-          "answers": [
-            {
-              "id": "A",
-              "text": "Kamień Filozoficzny",
-              "correct": true
-            },
-            {
-              "id": "B",
-              "text": "Komnata Tajemnic",
-              "correct": false
-            },
-            {
-              "id": "C",
-              "text": "Więzień Azkabanu",
-              "correct": false
-            },
-            {
-              "id": "D",
-              "text": "Zakon Feniksa",
               "correct": false
             }
           ]
