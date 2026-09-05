@@ -1,0 +1,460 @@
+{
+  "categories": [
+    {
+      "id": "film-tv",
+      "name": "Film i seriale",
+      "icon": "🎬",
+      "questions": [
+        {
+          "id": "film-tv-01",
+          "question": "Lorem ipsum dolor sit amet?",
+          "answers": [
+            { "id": "A", "text": "Lorem ipsum", "correct": true },
+            { "id": "B", "text": "Dolor sit amet", "correct": false },
+            { "id": "C", "text": "Consectetur adipiscing", "correct": false },
+            { "id": "D", "text": "Elit sed do", "correct": false }
+          ]
+        },
+        {
+          "id": "film-tv-02",
+          "question": "Consectetur adipiscing elit lorem ipsum?",
+          "answers": [
+            { "id": "A", "text": "Tempor incididunt", "correct": false },
+            { "id": "B", "text": "Ut labore", "correct": true },
+            { "id": "C", "text": "Et dolore", "correct": false },
+            { "id": "D", "text": "Magna aliqua", "correct": false }
+          ]
+        },
+        {
+          "id": "film-tv-03",
+          "question": "Ut enim ad minim veniam quis nostrud?",
+          "answers": [
+            { "id": "A", "text": "Exercitation", "correct": false },
+            { "id": "B", "text": "Ullamco laboris", "correct": false },
+            { "id": "C", "text": "Nisi ut aliquip", "correct": true },
+            { "id": "D", "text": "Ex ea commodo", "correct": false }
+          ]
+        },
+        {
+          "id": "film-tv-04",
+          "question": "Duis aute irure dolor in reprehenderit?",
+          "answers": [
+            { "id": "A", "text": "Voluptate", "correct": false },
+            { "id": "B", "text": "Velit esse", "correct": false },
+            { "id": "C", "text": "Cillum dolore", "correct": false },
+            { "id": "D", "text": "Eu fugiat", "correct": true }
+          ]
+        },
+        {
+          "id": "film-tv-05",
+          "question": "Excepteur sint occaecat cupidatat non proident?",
+          "answers": [
+            { "id": "A", "text": "Sunt in culpa", "correct": true },
+            { "id": "B", "text": "Qui officia", "correct": false },
+            { "id": "C", "text": "Deserunt mollit", "correct": false },
+            { "id": "D", "text": "Anim id est", "correct": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "name": "Muzyka",
+      "icon": "🎵",
+      "questions": [
+        {
+          "id": "music-01",
+          "question": "Lorem ipsum dolor sit amet?",
+          "answers": [
+            { "id": "A", "text": "Lorem", "correct": false },
+            { "id": "B", "text": "Ipsum", "correct": true },
+            { "id": "C", "text": "Dolor", "correct": false },
+            { "id": "D", "text": "Amet", "correct": false }
+          ]
+        },
+        {
+          "id": "music-02",
+          "question": "Consectetur adipiscing elit sed do?",
+          "answers": [
+            { "id": "A", "text": "Consectetur", "correct": true },
+            { "id": "B", "text": "Adipiscing", "correct": false },
+            { "id": "C", "text": "Elit", "correct": false },
+            { "id": "D", "text": "Tempor", "correct": false }
+          ]
+        },
+        {
+          "id": "music-03",
+          "question": "Eiusmod tempor incididunt ut labore?",
+          "answers": [
+            { "id": "A", "text": "Incididunt", "correct": false },
+            { "id": "B", "text": "Labore", "correct": false },
+            { "id": "C", "text": "Dolore", "correct": true },
+            { "id": "D", "text": "Magna", "correct": false }
+          ]
+        },
+        {
+          "id": "music-04",
+          "question": "Ut enim ad minim veniam?",
+          "answers": [
+            { "id": "A", "text": "Minim", "correct": false },
+            { "id": "B", "text": "Veniam", "correct": false },
+            { "id": "C", "text": "Quis", "correct": false },
+            { "id": "D", "text": "Nostrud", "correct": true }
+          ]
+        },
+        {
+          "id": "music-05",
+          "question": "Quis nostrud exercitation ullamco laboris?",
+          "answers": [
+            { "id": "A", "text": "Ullamco", "correct": true },
+            { "id": "B", "text": "Laboris", "correct": false },
+            { "id": "C", "text": "Aliquip", "correct": false },
+            { "id": "D", "text": "Commodo", "correct": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "world",
+      "name": "Świat",
+      "icon": "🌍",
+      "questions": [
+        {
+          "id": "world-01",
+          "question": "Lorem ipsum dolor sit amet?",
+          "answers": [
+            { "id": "A", "text": "Lorem", "correct": true },
+            { "id": "B", "text": "Ipsum", "correct": false },
+            { "id": "C", "text": "Dolor", "correct": false },
+            { "id": "D", "text": "Amet", "correct": false }
+          ]
+        },
+        {
+          "id": "world-02",
+          "question": "Consectetur adipiscing elit sed do?",
+          "answers": [
+            { "id": "A", "text": "Adipiscing", "correct": false },
+            { "id": "B", "text": "Consectetur", "correct": true },
+            { "id": "C", "text": "Eiusmod", "correct": false },
+            { "id": "D", "text": "Tempor", "correct": false }
+          ]
+        },
+        {
+          "id": "world-03",
+          "question": "Incididunt ut labore et dolore magna?",
+          "answers": [
+            { "id": "A", "text": "Labore", "correct": false },
+            { "id": "B", "text": "Dolore", "correct": false },
+            { "id": "C", "text": "Magna", "correct": true },
+            { "id": "D", "text": "Aliqua", "correct": false }
+          ]
+        },
+        {
+          "id": "world-04",
+          "question": "Ut enim ad minim veniam quis?",
+          "answers": [
+            { "id": "A", "text": "Enim", "correct": false },
+            { "id": "B", "text": "Minim", "correct": false },
+            { "id": "C", "text": "Veniam", "correct": false },
+            { "id": "D", "text": "Quis", "correct": true }
+          ]
+        },
+        {
+          "id": "world-05",
+          "question": "Duis aute irure dolor reprehenderit?",
+          "answers": [
+            { "id": "A", "text": "Duis aute", "correct": true },
+            { "id": "B", "text": "Irure", "correct": false },
+            { "id": "C", "text": "Dolor", "correct": false },
+            { "id": "D", "text": "Reprehenderit", "correct": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "science-nature",
+      "name": "Nauka i natura",
+      "icon": "🔬",
+      "questions": [
+        {
+          "id": "science-nature-01",
+          "question": "Lorem ipsum dolor sit amet?",
+          "answers": [
+            { "id": "A", "text": "Lorem", "correct": false },
+            { "id": "B", "text": "Ipsum", "correct": true },
+            { "id": "C", "text": "Dolor", "correct": false },
+            { "id": "D", "text": "Amet", "correct": false }
+          ]
+        },
+        {
+          "id": "science-nature-02",
+          "question": "Consectetur adipiscing elit eiusmod?",
+          "answers": [
+            { "id": "A", "text": "Consectetur", "correct": true },
+            { "id": "B", "text": "Adipiscing", "correct": false },
+            { "id": "C", "text": "Elit", "correct": false },
+            { "id": "D", "text": "Eiusmod", "correct": false }
+          ]
+        },
+        {
+          "id": "science-nature-03",
+          "question": "Tempor incididunt ut labore dolore?",
+          "answers": [
+            { "id": "A", "text": "Tempor", "correct": false },
+            { "id": "B", "text": "Incididunt", "correct": false },
+            { "id": "C", "text": "Labore", "correct": true },
+            { "id": "D", "text": "Dolore", "correct": false }
+          ]
+        },
+        {
+          "id": "science-nature-04",
+          "question": "Magna aliqua ut enim minim?",
+          "answers": [
+            { "id": "A", "text": "Magna", "correct": false },
+            { "id": "B", "text": "Aliqua", "correct": false },
+            { "id": "C", "text": "Enim", "correct": false },
+            { "id": "D", "text": "Minim", "correct": true }
+          ]
+        },
+        {
+          "id": "science-nature-05",
+          "question": "Veniam quis nostrud exercitation?",
+          "answers": [
+            { "id": "A", "text": "Veniam", "correct": true },
+            { "id": "B", "text": "Quis", "correct": false },
+            { "id": "C", "text": "Nostrud", "correct": false },
+            { "id": "D", "text": "Exercitation", "correct": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "food-drink",
+      "name": "Jedzenie i napoje",
+      "icon": "🍕",
+      "questions": [
+        {
+          "id": "food-drink-01",
+          "question": "Lorem ipsum dolor sit amet?",
+          "answers": [
+            { "id": "A", "text": "Lorem", "correct": true },
+            { "id": "B", "text": "Ipsum", "correct": false },
+            { "id": "C", "text": "Dolor", "correct": false },
+            { "id": "D", "text": "Amet", "correct": false }
+          ]
+        },
+        {
+          "id": "food-drink-02",
+          "question": "Consectetur adipiscing elit sed?",
+          "answers": [
+            { "id": "A", "text": "Consectetur", "correct": false },
+            { "id": "B", "text": "Adipiscing", "correct": true },
+            { "id": "C", "text": "Elit", "correct": false },
+            { "id": "D", "text": "Sed", "correct": false }
+          ]
+        },
+        {
+          "id": "food-drink-03",
+          "question": "Eiusmod tempor incididunt labore?",
+          "answers": [
+            { "id": "A", "text": "Eiusmod", "correct": false },
+            { "id": "B", "text": "Tempor", "correct": false },
+            { "id": "C", "text": "Incididunt", "correct": true },
+            { "id": "D", "text": "Labore", "correct": false }
+          ]
+        },
+        {
+          "id": "food-drink-04",
+          "question": "Dolore magna aliqua enim?",
+          "answers": [
+            { "id": "A", "text": "Dolore", "correct": false },
+            { "id": "B", "text": "Magna", "correct": false },
+            { "id": "C", "text": "Aliqua", "correct": false },
+            { "id": "D", "text": "Enim", "correct": true }
+          ]
+        },
+        {
+          "id": "food-drink-05",
+          "question": "Minim veniam quis nostrud?",
+          "answers": [
+            { "id": "A", "text": "Minim", "correct": true },
+            { "id": "B", "text": "Veniam", "correct": false },
+            { "id": "C", "text": "Quis", "correct": false },
+            { "id": "D", "text": "Nostrud", "correct": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pop-culture",
+      "name": "Popkultura i rozrywka",
+      "icon": "🎮",
+      "questions": [
+        {
+          "id": "pop-culture-01",
+          "question": "Lorem ipsum dolor sit amet?",
+          "answers": [
+            { "id": "A", "text": "Lorem", "correct": false },
+            { "id": "B", "text": "Ipsum", "correct": true },
+            { "id": "C", "text": "Dolor", "correct": false },
+            { "id": "D", "text": "Amet", "correct": false }
+          ]
+        },
+        {
+          "id": "pop-culture-02",
+          "question": "Consectetur adipiscing elit sed do?",
+          "answers": [
+            { "id": "A", "text": "Consectetur", "correct": true },
+            { "id": "B", "text": "Adipiscing", "correct": false },
+            { "id": "C", "text": "Elit", "correct": false },
+            { "id": "D", "text": "Sed", "correct": false }
+          ]
+        },
+        {
+          "id": "pop-culture-03",
+          "question": "Eiusmod tempor incididunt ut?",
+          "answers": [
+            { "id": "A", "text": "Eiusmod", "correct": false },
+            { "id": "B", "text": "Tempor", "correct": false },
+            { "id": "C", "text": "Incididunt", "correct": true },
+            { "id": "D", "text": "Ut", "correct": false }
+          ]
+        },
+        {
+          "id": "pop-culture-04",
+          "question": "Labore et dolore magna aliqua?",
+          "answers": [
+            { "id": "A", "text": "Labore", "correct": false },
+            { "id": "B", "text": "Dolore", "correct": false },
+            { "id": "C", "text": "Magna", "correct": false },
+            { "id": "D", "text": "Aliqua", "correct": true }
+          ]
+        },
+        {
+          "id": "pop-culture-05",
+          "question": "Ut enim ad minim veniam?",
+          "answers": [
+            { "id": "A", "text": "Ut enim", "correct": true },
+            { "id": "B", "text": "Ad minim", "correct": false },
+            { "id": "C", "text": "Veniam", "correct": false },
+            { "id": "D", "text": "Quis", "correct": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "weird-facts",
+      "name": "Absurdalne fakty",
+      "icon": "🤯",
+      "questions": [
+        {
+          "id": "weird-facts-01",
+          "question": "Lorem ipsum dolor sit amet?",
+          "answers": [
+            { "id": "A", "text": "Lorem", "correct": true },
+            { "id": "B", "text": "Ipsum", "correct": false },
+            { "id": "C", "text": "Dolor", "correct": false },
+            { "id": "D", "text": "Amet", "correct": false }
+          ]
+        },
+        {
+          "id": "weird-facts-02",
+          "question": "Consectetur adipiscing elit?",
+          "answers": [
+            { "id": "A", "text": "Consectetur", "correct": false },
+            { "id": "B", "text": "Adipiscing", "correct": true },
+            { "id": "C", "text": "Elit", "correct": false },
+            { "id": "D", "text": "Eiusmod", "correct": false }
+          ]
+        },
+        {
+          "id": "weird-facts-03",
+          "question": "Tempor incididunt ut labore?",
+          "answers": [
+            { "id": "A", "text": "Tempor", "correct": false },
+            { "id": "B", "text": "Incididunt", "correct": false },
+            { "id": "C", "text": "Labore", "correct": true },
+            { "id": "D", "text": "Dolore", "correct": false }
+          ]
+        },
+        {
+          "id": "weird-facts-04",
+          "question": "Magna aliqua ut enim?",
+          "answers": [
+            { "id": "A", "text": "Magna", "correct": false },
+            { "id": "B", "text": "Aliqua", "correct": false },
+            { "id": "C", "text": "Ut", "correct": false },
+            { "id": "D", "text": "Enim", "correct": true }
+          ]
+        },
+        {
+          "id": "weird-facts-05",
+          "question": "Minim veniam quis nostrud?",
+          "answers": [
+            { "id": "A", "text": "Minim", "correct": true },
+            { "id": "B", "text": "Veniam", "correct": false },
+            { "id": "C", "text": "Quis", "correct": false },
+            { "id": "D", "text": "Nostrud", "correct": false }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "internet",
+      "name": "Internet",
+      "icon": "🌐",
+      "questions": [
+        {
+          "id": "internet-01",
+          "question": "Lorem ipsum dolor sit amet?",
+          "answers": [
+            { "id": "A", "text": "Lorem", "correct": false },
+            { "id": "B", "text": "Ipsum", "correct": true },
+            { "id": "C", "text": "Dolor", "correct": false },
+            { "id": "D", "text": "Amet", "correct": false }
+          ]
+        },
+        {
+          "id": "internet-02",
+          "question": "Consectetur adipiscing elit sed?",
+          "answers": [
+            { "id": "A", "text": "Consectetur", "correct": true },
+            { "id": "B", "text": "Adipiscing", "correct": false },
+            { "id": "C", "text": "Elit", "correct": false },
+            { "id": "D", "text": "Sed", "correct": false }
+          ]
+        },
+        {
+          "id": "internet-03",
+          "question": "Eiusmod tempor incididunt labore?",
+          "answers": [
+            { "id": "A", "text": "Eiusmod", "correct": false },
+            { "id": "B", "text": "Tempor", "correct": false },
+            { "id": "C", "text": "Incididunt", "correct": true },
+            { "id": "D", "text": "Labore", "correct": false }
+          ]
+        },
+        {
+          "id": "internet-04",
+          "question": "Dolore magna aliqua ut enim?",
+          "answers": [
+            { "id": "A", "text": "Dolore", "correct": false },
+            { "id": "B", "text": "Magna", "correct": false },
+            { "id": "C", "text": "Aliqua", "correct": false },
+            { "id": "D", "text": "Ut enim", "correct": true }
+          ]
+        },
+        {
+          "id": "internet-05",
+          "question": "Ad minim veniam quis nostrud?",
+          "answers": [
+            { "id": "A", "text": "Ad minim", "correct": true },
+            { "id": "B", "text": "Veniam", "correct": false },
+            { "id": "C", "text": "Quis", "correct": false },
+            { "id": "D", "text": "Nostrud", "correct": false }
+          ]
+        }
+      ]
+    }
+  ]
+}

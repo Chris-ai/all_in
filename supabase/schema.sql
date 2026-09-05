@@ -1,0 +1,10 @@
+create extension if not exists pgcrypto;
+create table if not exists public.players (id uuid primary key default gen_random_uuid(), name text not null check (char_length(trim(name)) between 2 and 32), created_at timestamptz not null default now());
+create table if not exists public.game_state (id text primary key, mode text not null default 'registration' check (mode in ('registration', 'game')), updated_at timestamptz not null default now());
+insert into public.game_state (id, mode) values ('main', 'registration') on conflict (id) do nothing;
+alter table public.players enable row level security;
+alter table public.game_state enable row level security;
+create policy "Anyone can join the game" on public.players for insert to anon, authenticated with check (true);
+create policy "Players can be listed in the lobby" on public.players for select to anon, authenticated using (true);
+create policy "Game state is public" on public.game_state for select to anon, authenticated using (true);
+create policy "MVP admin can change game state" on public.game_state for update to anon, authenticated using (id = 'main') with check (id = 'main');
