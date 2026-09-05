@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import './App.css'
 import gameData from './assets/data.json'
@@ -60,11 +60,15 @@ function MobilePlayerView() {
   const [questionPhase, setQuestionPhase] = useState<RoundPhase>('locked')
   const [bettingEndsAt, setBettingEndsAt] = useState<string | null>(null)
   const [betSaved, setBetSaved] = useState(false)
+  const [loadedBetKey, setLoadedBetKey] = useState('')
   const [categoryIds, setCategoryIds] = useState<CategoryId[]>([])
   const [roundNumber, setRoundNumber] = useState(0)
+  const roundNumberRef = useRef(0)
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null)
   const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null)
   const activeQuestion = getQuestion(currentQuestionId)
+  const playerId = player?.id
+  const betHydrated = Boolean(playerId) && loadedBetKey === `${playerId}:${roundNumber}`
   const options = useMemo(() => categoryIds.length === 3 ? categoryIds.map((id) => ALL_CATEGORIES.find((category) => category.id === id)).filter((category): category is Category => Boolean(category)) : ALL_CATEGORIES.slice(0, 3), [categoryIds])
   useEffect(() => {
     const savedId = localStorage.getItem(PLAYER_ID_KEY)
@@ -84,35 +88,33 @@ function MobilePlayerView() {
   }, [mode, questionPhase, bettingEndsAt])
   useEffect(() => {
     if (!supabaseReady) return
-    const refresh = () => supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,current_question,correct_answer_index,settled_round').then((rows) => { if (!rows[0]) return; setMode(rows[0].mode); setCategoryIds(rows[0].category_options ?? []); setRoundNumber(rows[0].round_number ?? 0); setSelectedCategoryId(rows[0].selected_category ?? null); setQuestionPhase(rows[0].question_phase ?? 'locked'); setBettingEndsAt(rows[0].betting_ends_at ?? null); setCurrentQuestionId(rows[0].current_question ?? null) }).catch(() => setError('Brak połączenia z grą.'))
+    const refresh = () => supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,current_question,correct_answer_index,settled_round').then((rows) => { if (!rows[0]) return; setMode(rows[0].mode); setCategoryIds((current) => JSON.stringify(current) === JSON.stringify(rows[0].category_options ?? []) ? current : (rows[0].category_options ?? [])); const nextRound = rows[0].round_number ?? 0; if (nextRound !== roundNumberRef.current) { roundNumberRef.current = nextRound; setRoundNumber(nextRound); setSelected(null) }; setSelectedCategoryId(rows[0].selected_category ?? null); setQuestionPhase(rows[0].question_phase ?? 'locked'); setBettingEndsAt(rows[0].betting_ends_at ?? null); setCurrentQuestionId(rows[0].current_question ?? null) }).catch(() => setError('Brak połączenia z grą.'))
     refresh(); const timer = window.setInterval(refresh, 1500); return () => window.clearInterval(timer)
   }, [])
   useEffect(() => {
-    if (!player || !supabaseReady) return
-    const refreshPlayer = () => supabaseRequest<Player[]>(`players?id=eq.${player.id}&select=id,name,color,balance,created_at`).then((rows) => { if (rows[0]) setPlayer(rows[0]) }).catch(() => undefined)
+    if (!playerId || !supabaseReady) return
+    const refreshPlayer = () => supabaseRequest<Player[]>(`players?id=eq.${playerId}&select=id,name,color,balance,created_at`).then((rows) => { if (rows[0]) setPlayer((current) => current?.balance === rows[0].balance ? current : rows[0]) }).catch(() => undefined)
     const timer = window.setInterval(refreshPlayer, 1500); return () => window.clearInterval(timer)
-  }, [player?.id])
-  useEffect(() => { setSelected(null) }, [roundNumber])
+  }, [playerId])
   useEffect(() => {
-    if (!player || mode !== 'game' || roundNumber === 0 || options.length !== 3) return
-    supabaseRequest<{ category_id: CategoryId }[]>(`category_votes?player_id=eq.${player.id}&round_number=eq.${roundNumber}&select=category_id`).then((rows) => {
+    if (!playerId || mode !== 'game' || roundNumber === 0 || options.length !== 3) return
+    supabaseRequest<{ category_id: CategoryId }[]>(`category_votes?player_id=eq.${playerId}&round_number=eq.${roundNumber}&select=category_id`).then((rows) => {
       if (!rows[0]) return
       const savedIndex = options.findIndex((category) => category.id === rows[0].category_id)
       if (savedIndex >= 0) setSelected(savedIndex)
     }).catch(() => undefined)
-  }, [player, mode, roundNumber, options])
+  }, [playerId, mode, roundNumber, options])
   useEffect(() => {
-    if (selected === null || !player || mode !== 'game' || roundNumber === 0 || !options[selected]) return
-    supabaseRequest(`category_votes?on_conflict=player_id,round_number`, { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ player_id: player.id, round_number: roundNumber, category_id: options[selected].id }) }).catch(() => setError('Nie udało się zapisać głosu.'))
-  }, [selected, player, mode, roundNumber, options])
+    if (selected === null || !playerId || mode !== 'game' || roundNumber === 0 || !options[selected]) return
+    supabaseRequest(`category_votes?on_conflict=player_id,round_number`, { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ player_id: playerId, round_number: roundNumber, category_id: options[selected].id }) }).catch(() => setError('Nie udało się zapisać głosu.'))
+  }, [selected, playerId, mode, roundNumber, options])
   useEffect(() => {
-    if (!player || mode !== 'question' || roundNumber === 0) return
-    setBetSaved(false)
-    supabaseRequest<QuestionBet[]>(`question_bets?player_id=eq.${player.id}&round_number=eq.${roundNumber}&select=player_id,round_number,amounts`).then((rows) => {
+    if (!playerId || mode !== 'question' || roundNumber === 0) return
+    supabaseRequest<QuestionBet[]>(`question_bets?player_id=eq.${playerId}&round_number=eq.${roundNumber}&select=player_id,round_number,amounts`).then((rows) => {
       if (rows[0]?.amounts?.length === 4) { setPhoneBets(rows[0].amounts); setBetSaved(true) }
-      else setPhoneBets([0, 0, 0, 0])
-    }).catch(() => setError('Nie udało się odczytać stawki.'))
-  }, [player, mode, roundNumber])
+      else { setPhoneBets([0, 0, 0, 0]); setBetSaved(false) }
+    }).catch(() => setError('Nie udało się odczytać stawki.')).finally(() => setLoadedBetKey(`${playerId}:${roundNumber}`))
+  }, [playerId, mode, roundNumber])
   async function join(event: FormEvent) {
     event.preventDefault(); const cleanName = name.trim().replace(/\s+/g, ' ')
     if (cleanName.length < 2) return setError('Podaj imię mające co najmniej 2 znaki.')
@@ -129,11 +131,11 @@ function MobilePlayerView() {
   const committed = phoneBets.reduce((sum, amount) => sum + amount, 0)
   const availableBalance = Math.max(0, (player?.balance ?? 1000000) - committed)
   function adjustPhoneBet(index: number, direction: -1 | 1) {
-    if (phoneSeconds <= 0 || questionPhase !== 'betting' || betSaved) return
+    if (!betHydrated || phoneSeconds <= 0 || questionPhase !== 'betting' || betSaved) return
     setPhoneBets((current) => current.map((amount, answerIndex) => answerIndex === index ? Math.max(0, Math.min(amount + direction * 50000, amount + availableBalance)) : amount))
   }
   async function submitBet() {
-    if (!player || questionPhase !== 'betting' || phoneSeconds <= 0 || committed <= 0 || betSaved) return
+    if (!player || !betHydrated || questionPhase !== 'betting' || phoneSeconds <= 0 || committed <= 0 || betSaved) return
     setBusy(true); setError('')
     try {
       await supabaseRequest('question_bets?on_conflict=player_id,round_number', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ player_id: player.id, round_number: roundNumber, amounts: phoneBets }) })
@@ -145,7 +147,7 @@ function MobilePlayerView() {
   if (!player) return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><section><span className="mobile-kicker">DOŁĄCZ DO GRY</span><h1>Jak masz na imię?</h1><p>Podaj nazwę, pod którą zobaczą Cię pozostali gracze.</p><form className="mobile-join" onSubmit={join}><label htmlFor="join-name">Twoje imię lub nazwa</label><input id="join-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={32} placeholder="np. Krzysiek" autoFocus /><button className="primary-button" disabled={busy} type="submit">{busy ? 'Dołączanie…' : 'Dołączam'} <span>→</span></button></form>{error && <p className="form-message">{error}</p>}</section></main>
   if (mode === 'registration') return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><div className="balance-notch"><span>SALDO</span><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div style={{ background: player.color }}>{player.name.charAt(0)}</div><span className="mobile-kicker">JESTEŚ W GRZE</span><h1>{player.name}</h1><p>Gra niedługo się zacznie…</p><span className="mobile-waiting"><i /></span></div></section></main>
   if (mode === 'question' && questionPhase !== 'betting') return <main className="mobile-play"><div className="mobile-glow" /><div className="balance-notch"><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">STAWKI ZAMKNIĘTE</span><h1>Oczekuj na wyniki</h1><p>Prowadzący za chwilę odsłoni poprawną odpowiedź.</p><span className="mobile-waiting"><i /></span></div></section></main>
-  if (mode === 'question') return <main className="mobile-play mobile-question"><div className="phone-progress" style={{ transform: `scaleX(${phoneSeconds / 60})` }} /><div className="balance-notch"><span>DOSTĘPNE</span><strong>{availableBalance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><h2>{activeQuestion.question}</h2><div className="mobile-answers">{activeQuestion.answers.map((answer, index) => <article key={answer.id}><div><span>{answer.id}</span><strong>{answer.text}</strong></div><div className="bet-control"><button type="button" onClick={() => adjustPhoneBet(index, -1)} disabled={betSaved || phoneBets[index] === 0 || phoneSeconds === 0}>−</button><b>{phoneBets[index].toLocaleString('pl-PL')} <small>PLN</small></b><button type="button" onClick={() => adjustPhoneBet(index, 1)} disabled={betSaved || availableBalance < 50000 || phoneSeconds === 0}>+</button></div></article>)}</div><button className="primary-button mobile-submit-bet" type="button" onClick={submitBet} disabled={busy || betSaved || committed === 0 || phoneSeconds === 0}>{betSaved ? 'Stawka zapisana ✓' : busy ? 'Zapisywanie…' : 'Postaw'}</button>{error && <p className="form-message">{error}</p>}</section></main>
+  if (mode === 'question') return <main className="mobile-play mobile-question"><div className="phone-progress" style={{ transform: `scaleX(${phoneSeconds / 60})` }} /><div className="balance-notch"><span>DOSTĘPNE</span><strong>{availableBalance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><h2>{activeQuestion.question}</h2><div className="mobile-answers">{activeQuestion.answers.map((answer, index) => <article key={answer.id}><div><span>{answer.id}</span><strong>{answer.text}</strong></div><div className="bet-control"><button type="button" onClick={() => adjustPhoneBet(index, -1)} disabled={!betHydrated || betSaved || phoneBets[index] === 0 || phoneSeconds === 0}>−</button><b>{phoneBets[index].toLocaleString('pl-PL')} <small>PLN</small></b><button type="button" onClick={() => adjustPhoneBet(index, 1)} disabled={!betHydrated || betSaved || availableBalance < 50000 || phoneSeconds === 0}>+</button></div></article>)}</div><button className="primary-button mobile-submit-bet" type="button" onClick={submitBet} disabled={!betHydrated || busy || betSaved || committed === 0 || phoneSeconds === 0}>{!betHydrated ? 'Przygotowanie…' : betSaved ? 'Stawka zapisana ✓' : busy ? 'Zapisywanie…' : 'Postaw'}</button>{error && <p className="form-message">{error}</p>}</section></main>
   return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><div className="balance-notch"><span>SALDO</span><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section>{selected === null ? <><span className="mobile-kicker">WYBÓR KATEGORII</span><h1>Na co oddajesz głos?</h1><p>Wybierz jedną kategorię. Po zatwierdzeniu nie możesz zmienić decyzji.</p><div className="mobile-categories">{options.map((category, index) => <button key={category.id} type="button" onClick={() => setSelected(index)}><strong>{category.name}</strong><i>→</i></button>)}</div></> : <div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">GŁOS ODDANY</span><h1>{options[selected].name}</h1><p>Czekamy na pozostałych graczy i wynik losowania.</p><span className="mobile-waiting"><i /></span></div>}</section></main>
 }
 
