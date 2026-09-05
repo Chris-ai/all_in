@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-:root { font-family: 'Inter', sans-serif; color: #f8f6ef; background: #090b0a; font-synthesis: none; text-rendering: optimizeLegibility; --lime: #d7ff3f; --ink: #090b0a; --panel: #121512; --muted: #92988d; --line: rgba(255,255,255,.11); }
+:root { font-family: 'Inter', sans-serif; color: #f9f5ff; background: #07051b; font-synthesis: none; text-rendering: optimizeLegibility; --lime: #ffc84a; --ink: #10082b; --panel: #16113c; --muted: #a9a0c3; --line: rgba(157,129,255,.26); }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, input { font: inherit; }

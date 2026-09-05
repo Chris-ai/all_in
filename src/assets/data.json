@@ -1,0 +1,599 @@
+{
+  "categories": [
+    {
+      "id": "film-tv",
+      "name": "Film i seriale",
+      "icon": "🎬",
+      "questions": [
+        {
+          "id": "film-tv-01",
+          "question": "Który z tych filmów miał premierę najwcześniej?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Shrek",
+              "correct": true
+            },
+            {
+              "id": "B",
+              "text": "Epoka lodowcowa",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Gdzie jest Nemo",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Madagaskar",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "film-tv-02",
+          "question": "Który film Disneya jako pierwszy film animowany w historii otrzymał nominację do Oscara za najlepszy film?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Król Lew",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Piękna i Bestia",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "Aladyn",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Mała Syrenka",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "film-tv-03",
+          "question": "W której części Harry'ego Pottera po raz pierwszy pojawił się motyw muzyczny „Hedwig's Theme”?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Kamień Filozoficzny",
+              "correct": true
+            },
+            {
+              "id": "B",
+              "text": "Komnata Tajemnic",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Więzień Azkabanu",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Zakon Feniksa",
+              "correct": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "name": "Muzyka",
+      "icon": "🎵",
+      "questions": [
+        {
+          "id": "music-01",
+          "question": "Który teledysk jako pierwszy w historii YouTube przekroczył miliard wyświetleń?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Justin Bieber — Baby",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "PSY — Gangnam Style",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "Luis Fonsi — Despacito",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Adele — Rolling in the Deep",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "music-02",
+          "question": "Który z tych artystów nigdy nie wystąpił w Super Bowl Halftime Show?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Lady Gaga",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Beyoncé",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Bruno Mars",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Taylor Swift",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "music-03",
+          "question": "Który z tych utworów w oryginalnej wersji albumowej trwa najdłużej?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Queen — Bohemian Rhapsody",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Eagles — Hotel California",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Led Zeppelin — Stairway to Heaven",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Guns N' Roses — November Rain",
+              "correct": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "world",
+      "name": "Świat",
+      "icon": "🌍",
+      "questions": [
+        {
+          "id": "world-01",
+          "question": "Ilu mieszkańców ma Hiszpania według danych z 2026 roku?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Mniej niż 35 mln",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "35–45 mln",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "45–55 mln",
+              "correct": true
+            },
+            {
+              "id": "D",
+              "text": "Ponad 55 mln",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "world-02",
+          "question": "Która z tych stolic leży najbardziej na północ?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Oslo",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Helsinki",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "Sztokholm",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Tallinn",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "world-03",
+          "question": "Które państwo ma najwięcej standardowych stref czasowych, jeśli uwzględnimy jego terytoria zamorskie i zależne?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Rosja",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "USA",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Francja",
+              "correct": true
+            },
+            {
+              "id": "D",
+              "text": "Australia",
+              "correct": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "science-nature",
+      "name": "Nauka i natura",
+      "icon": "🔬",
+      "questions": [
+        {
+          "id": "science-nature-01",
+          "question": "Na której planecie jeden obrót wokół własnej osi trwa dłużej niż jej obieg wokół Słońca?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Mars",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Wenus",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "Jowisz",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Merkury",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "science-nature-02",
+          "question": "Gdyby rozwinąć całe DNA znajdujące się w typowej diploidalnej ludzkiej komórce, jaką miałoby ono długość?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Około 2 cm",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Około 20 cm",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Około 2 metrów",
+              "correct": true
+            },
+            {
+              "id": "D",
+              "text": "Około 20 metrów",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "science-nature-03",
+          "question": "Jak długo światło ze Słońca dociera do Ziemi?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Około 8 sekund",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Około 80 sekund",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Około 8 minut",
+              "correct": true
+            },
+            {
+              "id": "D",
+              "text": "Około 80 minut",
+              "correct": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "food-drink",
+      "name": "Jedzenie i napoje",
+      "icon": "🍕",
+      "questions": [
+        {
+          "id": "food-drink-01",
+          "question": "Która przyprawa powstaje z wysuszonych znamion kwiatu?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Kardamon",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Szafran",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "Kurkuma",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Cynamon",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "food-drink-02",
+          "question": "Która z tych sieci miała najwięcej lokali na świecie według najnowszych dostępnych pełnych danych rocznych?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Starbucks",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "KFC",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "McDonald's",
+              "correct": true
+            },
+            {
+              "id": "D",
+              "text": "Pizza Hut",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "food-drink-03",
+          "question": "Który z tych napojów zawiera zazwyczaj najwięcej kofeiny w podanej porcji?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Espresso — 60 ml",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Kawa przelewowa — 200 ml",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "Coca-Cola — 355 ml",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Czarna herbata — 220 ml",
+              "correct": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "games-popculture",
+      "name": "Gry i popkultura",
+      "icon": "🎮",
+      "questions": [
+        {
+          "id": "games-popculture-01",
+          "question": "Jak nazywa się Pokémon Asha, który słynie z elektrycznych ataków?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Pikachu",
+              "correct": true
+            },
+            {
+              "id": "B",
+              "text": "Raichu",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Pichu",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Pachirisu",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "games-popculture-02",
+          "question": "Która z tych gier ukazała się najwcześniej?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Minecraft",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Fortnite",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "World of Warcraft",
+              "correct": true
+            },
+            {
+              "id": "D",
+              "text": "League of Legends",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "games-popculture-03",
+          "question": "Która z tych gier sprzedała się w największej liczbie egzemplarzy na świecie?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Grand Theft Auto V",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Minecraft",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "Wii Sports",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Mario Kart 8 Deluxe",
+              "correct": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "internet",
+      "name": "Internet",
+      "icon": "🌐",
+      "questions": [
+        {
+          "id": "internet-01",
+          "question": "Która z tych usług pojawiła się najwcześniej?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Facebook",
+              "correct": true
+            },
+            {
+              "id": "B",
+              "text": "YouTube",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Spotify",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Instagram",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "internet-02",
+          "question": "Do czego pierwotnie powstała sieć ARPANET, uznawana za poprzednika Internetu?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Do komunikacji między bazami wojskowymi",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Do wymiany zasobów i informacji między ośrodkami badawczymi",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "Do sterowania satelitami",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Do szyfrowanej komunikacji rządowej",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "internet-03",
+          "question": "Ile publicznych modeli AI znajduje się obecnie na platformie Hugging Face?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Mniej niż 500 tys.",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "500 tys. – 1 mln",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "1–3 mln",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Ponad 3 mln",
+              "correct": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
