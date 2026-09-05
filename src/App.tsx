@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import './App.css'
 import gameData from './assets/data.json'
 
@@ -51,14 +52,12 @@ function MobilePlayerView() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [mode, setMode] = useState<ScreenMode>('registration')
   const [name, setName] = useState('')
-  const [selected, setSelected] = useState<number | null>(null)
+  const [selectedVote, setSelectedVote] = useState<{ round: number; index: number } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [restoring, setRestoring] = useState(true)
   const [phoneBets, setPhoneBets] = useState([0, 0, 0, 0])
-  const [phoneSeconds, setPhoneSeconds] = useState(60)
   const [questionPhase, setQuestionPhase] = useState<RoundPhase>('locked')
-  const [bettingEndsAt, setBettingEndsAt] = useState<string | null>(null)
   const [betSaved, setBetSaved] = useState(false)
   const [loadedBetKey, setLoadedBetKey] = useState('')
   const [categoryIds, setCategoryIds] = useState<CategoryId[]>([])
@@ -66,8 +65,10 @@ function MobilePlayerView() {
   const roundNumberRef = useRef(0)
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null)
   const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null)
+  const [mobileRanking, setMobileRanking] = useState<Player[]>([])
   const activeQuestion = getQuestion(currentQuestionId)
   const playerId = player?.id
+  const selected = selectedVote?.round === roundNumber ? selectedVote.index : null
   const betHydrated = Boolean(playerId) && loadedBetKey === `${playerId}:${roundNumber}`
   const options = useMemo(() => categoryIds.length === 3 ? categoryIds.map((id) => ALL_CATEGORIES.find((category) => category.id === id)).filter((category): category is Category => Boolean(category)) : ALL_CATEGORIES.slice(0, 3), [categoryIds])
   useEffect(() => {
@@ -82,27 +83,25 @@ function MobilePlayerView() {
     }).catch(() => localStorage.removeItem(PLAYER_ID_KEY)).finally(() => setRestoring(false))
   }, [])
   useEffect(() => {
-    if (mode !== 'question' || questionPhase !== 'betting' || !bettingEndsAt) return
-    const update = () => setPhoneSeconds(Math.max(0, Math.ceil((new Date(bettingEndsAt).getTime() - Date.now()) / 1000)))
-    update(); const timer = window.setInterval(update, 250); return () => window.clearInterval(timer)
-  }, [mode, questionPhase, bettingEndsAt])
-  useEffect(() => {
     if (!supabaseReady) return
-    const refresh = () => supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,current_question,correct_answer_index,settled_round').then((rows) => { if (!rows[0]) return; setMode(rows[0].mode); setCategoryIds((current) => JSON.stringify(current) === JSON.stringify(rows[0].category_options ?? []) ? current : (rows[0].category_options ?? [])); const nextRound = rows[0].round_number ?? 0; if (nextRound !== roundNumberRef.current) { roundNumberRef.current = nextRound; setRoundNumber(nextRound); setSelected(null) }; setSelectedCategoryId(rows[0].selected_category ?? null); setQuestionPhase(rows[0].question_phase ?? 'locked'); setBettingEndsAt(rows[0].betting_ends_at ?? null); setCurrentQuestionId(rows[0].current_question ?? null) }).catch(() => setError('Brak połączenia z grą.'))
+    const refresh = () => supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,current_question,correct_answer_index,settled_round').then((rows) => { if (!rows[0]) return; setMode(rows[0].mode); setCategoryIds((current) => JSON.stringify(current) === JSON.stringify(rows[0].category_options ?? []) ? current : (rows[0].category_options ?? [])); const nextRound = rows[0].round_number ?? 0; if (nextRound !== roundNumberRef.current) { roundNumberRef.current = nextRound; setRoundNumber(nextRound); setSelectedVote(null) }; setSelectedCategoryId(rows[0].selected_category ?? null); setQuestionPhase(rows[0].question_phase ?? 'locked'); setCurrentQuestionId(rows[0].current_question ?? null) }).catch(() => setError('Brak połączenia z grą.'))
     refresh(); const timer = window.setInterval(refresh, 1500); return () => window.clearInterval(timer)
   }, [])
   useEffect(() => {
     if (!playerId || !supabaseReady) return
-    const refreshPlayer = () => supabaseRequest<Player[]>(`players?id=eq.${playerId}&select=id,name,color,balance,created_at`).then((rows) => { if (rows[0]) setPlayer((current) => current?.balance === rows[0].balance ? current : rows[0]) }).catch(() => undefined)
+    const refreshPlayer = () => supabaseRequest<Player[]>('players?select=id,name,color,balance,created_at&order=balance.desc').then((rows) => { setMobileRanking(rows); const ownPlayer = rows.find((item) => item.id === playerId); if (ownPlayer) setPlayer((current) => current?.balance === ownPlayer.balance ? current : ownPlayer) }).catch(() => undefined)
+    refreshPlayer()
     const timer = window.setInterval(refreshPlayer, 1500); return () => window.clearInterval(timer)
   }, [playerId])
   useEffect(() => {
     if (!playerId || mode !== 'game' || roundNumber === 0 || options.length !== 3) return
+    let cancelled = false
     supabaseRequest<{ category_id: CategoryId }[]>(`category_votes?player_id=eq.${playerId}&round_number=eq.${roundNumber}&select=category_id`).then((rows) => {
-      if (!rows[0]) return
+      if (cancelled || !rows[0]) return
       const savedIndex = options.findIndex((category) => category.id === rows[0].category_id)
-      if (savedIndex >= 0) setSelected(savedIndex)
+      if (savedIndex >= 0) setSelectedVote({ round: roundNumber, index: savedIndex })
     }).catch(() => undefined)
+    return () => { cancelled = true }
   }, [playerId, mode, roundNumber, options])
   useEffect(() => {
     if (selected === null || !playerId || mode !== 'game' || roundNumber === 0 || !options[selected]) return
@@ -131,11 +130,11 @@ function MobilePlayerView() {
   const committed = phoneBets.reduce((sum, amount) => sum + amount, 0)
   const availableBalance = Math.max(0, (player?.balance ?? 1000000) - committed)
   function adjustPhoneBet(index: number, direction: -1 | 1) {
-    if (!betHydrated || phoneSeconds <= 0 || questionPhase !== 'betting' || betSaved) return
+    if (!betHydrated || questionPhase !== 'betting' || betSaved) return
     setPhoneBets((current) => current.map((amount, answerIndex) => answerIndex === index ? Math.max(0, Math.min(amount + direction * 50000, amount + availableBalance)) : amount))
   }
   async function submitBet() {
-    if (!player || !betHydrated || questionPhase !== 'betting' || phoneSeconds <= 0 || committed <= 0 || betSaved) return
+    if (!player || !betHydrated || questionPhase !== 'betting' || committed <= 0 || betSaved) return
     setBusy(true); setError('')
     try {
       await supabaseRequest('question_bets?on_conflict=player_id,round_number', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ player_id: player.id, round_number: roundNumber, amounts: phoneBets }) })
@@ -146,9 +145,9 @@ function MobilePlayerView() {
   if (player && mode === 'game' && selectedCategoryId) { const chosen = ALL_CATEGORIES.find((category) => category.id === selectedCategoryId); return <main className="mobile-play"><div className="mobile-glow" /><div className="balance-notch"><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">WYLOSOWANA KATEGORIA</span><h1>{chosen?.name ?? selectedCategoryId}</h1><p>Pytanie pojawi się za chwilę.</p><span className="mobile-waiting"><i /></span></div></section></main> }
   if (!player) return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><section><span className="mobile-kicker">DOŁĄCZ DO GRY</span><h1>Jak masz na imię?</h1><p>Podaj nazwę, pod którą zobaczą Cię pozostali gracze.</p><form className="mobile-join" onSubmit={join}><label htmlFor="join-name">Twoje imię lub nazwa</label><input id="join-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={32} placeholder="np. Krzysiek" autoFocus /><button className="primary-button" disabled={busy} type="submit">{busy ? 'Dołączanie…' : 'Dołączam'} <span>→</span></button></form>{error && <p className="form-message">{error}</p>}</section></main>
   if (mode === 'registration') return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><div className="balance-notch"><span>SALDO</span><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div style={{ background: player.color }}>{player.name.charAt(0)}</div><span className="mobile-kicker">JESTEŚ W GRZE</span><h1>{player.name}</h1><p>Gra niedługo się zacznie…</p><span className="mobile-waiting"><i /></span></div></section></main>
-  if (mode === 'question' && questionPhase !== 'betting') return <main className="mobile-play"><div className="mobile-glow" /><div className="balance-notch"><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">STAWKI ZAMKNIĘTE</span><h1>Oczekuj na wyniki</h1><p>Prowadzący za chwilę odsłoni poprawną odpowiedź.</p><span className="mobile-waiting"><i /></span></div></section></main>
-  if (mode === 'question') return <main className="mobile-play mobile-question"><div className="phone-progress" style={{ transform: `scaleX(${phoneSeconds / 60})` }} /><div className="balance-notch"><span>DOSTĘPNE</span><strong>{availableBalance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><h2>{activeQuestion.question}</h2><div className="mobile-answers">{activeQuestion.answers.map((answer, index) => <article key={answer.id}><div><span>{answer.id}</span><strong>{answer.text}</strong></div><div className="bet-control"><button type="button" onClick={() => adjustPhoneBet(index, -1)} disabled={!betHydrated || betSaved || phoneBets[index] === 0 || phoneSeconds === 0}>−</button><b>{phoneBets[index].toLocaleString('pl-PL')} <small>PLN</small></b><button type="button" onClick={() => adjustPhoneBet(index, 1)} disabled={!betHydrated || betSaved || availableBalance < 50000 || phoneSeconds === 0}>+</button></div></article>)}</div><button className="primary-button mobile-submit-bet" type="button" onClick={submitBet} disabled={!betHydrated || busy || betSaved || committed === 0 || phoneSeconds === 0}>{!betHydrated ? 'Przygotowanie…' : betSaved ? 'Stawka zapisana ✓' : busy ? 'Zapisywanie…' : 'Postaw'}</button>{error && <p className="form-message">{error}</p>}</section></main>
-  return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><div className="balance-notch"><span>SALDO</span><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section>{selected === null ? <><span className="mobile-kicker">WYBÓR KATEGORII</span><h1>Na co oddajesz głos?</h1><p>Wybierz jedną kategorię. Po zatwierdzeniu nie możesz zmienić decyzji.</p><div className="mobile-categories">{options.map((category, index) => <button key={category.id} type="button" onClick={() => setSelected(index)}><strong>{category.name}</strong><i>→</i></button>)}</div></> : <div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">GŁOS ODDANY</span><h1>{options[selected].name}</h1><p>Czekamy na pozostałych graczy i wynik losowania.</p><span className="mobile-waiting"><i /></span></div>}</section></main>
+  if (mode === 'question' && questionPhase !== 'betting') return <main className="mobile-play mobile-results"><div className="mobile-glow" /><div className="balance-notch"><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-results-heading"><span className="mobile-kicker">STAWKI ZAMKNIĘTE</span><h1>Ranking na żywo</h1><p>Saldo zmieni się automatycznie po odsłonięciu wyniku.</p></div><div className="mobile-ranking">{mobileRanking.map((item, index) => <div key={item.id} className={item.id === player.id ? 'is-me' : ''} style={{ '--player-color': item.color } as CSSProperties}><span>{index + 1}</span><i>{item.name.charAt(0)}</i><strong>{item.name}</strong><b>{item.balance.toLocaleString('pl-PL')} <small>PLN</small></b></div>)}</div><span className="mobile-waiting"><i /></span></section></main>
+  if (mode === 'question') return <main className="mobile-play mobile-question"><div className="balance-notch"><span>DOSTĘPNE</span><strong>{availableBalance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><h2>{activeQuestion.question}</h2><div className="mobile-answers">{activeQuestion.answers.map((answer, index) => <article key={answer.id}><div><span>{answer.id}</span><strong>{answer.text}</strong></div><div className="bet-control"><button type="button" onClick={() => adjustPhoneBet(index, -1)} disabled={!betHydrated || betSaved || phoneBets[index] === 0}>−</button><b>{phoneBets[index].toLocaleString('pl-PL')} <small>PLN</small></b><button type="button" onClick={() => adjustPhoneBet(index, 1)} disabled={!betHydrated || betSaved || availableBalance < 50000}>+</button></div></article>)}</div><button className="primary-button mobile-submit-bet" type="button" onClick={submitBet} disabled={!betHydrated || busy || betSaved || committed === 0}>{!betHydrated ? 'Przygotowanie…' : betSaved ? 'Stawka zapisana ✓' : busy ? 'Zapisywanie…' : 'Postaw'}</button>{error && <p className="form-message">{error}</p>}</section></main>
+  return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><div className="balance-notch"><span>SALDO</span><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section>{selected === null ? <><span className="mobile-kicker">WYBÓR KATEGORII</span><h1>Na co oddajesz głos?</h1><p>Wybierz jedną kategorię. Po zatwierdzeniu nie możesz zmienić decyzji.</p><div className="mobile-categories">{options.map((category, index) => <button key={category.id} type="button" onClick={() => setSelectedVote({ round: roundNumber, index })}><strong>{category.name}</strong><i>→</i></button>)}</div></> : <div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">GŁOS ODDANY</span><h1>{options[selected].name}</h1><p>Czekamy na pozostałych graczy i wynik losowania.</p><span className="mobile-waiting"><i /></span></div>}</section></main>
 }
 
 function PlayerView() {
@@ -173,6 +172,7 @@ function PlayerView() {
   const [questionBets, setQuestionBets] = useState<QuestionBet[]>([])
   const [hydrated, setHydrated] = useState(!supabaseReady)
   const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null)
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false)
   const activeQuestion = getQuestion(currentQuestionId)
   const questionAnswers = useMemo(() => {
     const playerById = new Map(players.map((player) => [player.id, player]))
@@ -303,14 +303,15 @@ function PlayerView() {
     setRoundNumber(nextRound); setCategoryOptions(chosenOptions); setVotes([0, 0, 0]); setMyVote(null); setFocusedCategory(null); setWinningCategory(null); setCategorySeconds(20); setCategoryPhase('voting'); setShowCategory(true); setBettingEndsAt(null); setCategoryEndsAt(categoryDeadline); setQuestionBets([])
     await supabaseRequest('game_state?id=eq.main', { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ mode: 'game', round_number: nextRound, category_options: chosenOptions.map((category) => category.id), selected_category: null, question_phase: 'locked', betting_ends_at: null, category_ends_at: categoryDeadline, used_categories: usedCategories, current_question: null, correct_answer_index: null, updated_at: new Date().toISOString() }) }).catch(() => undefined)
   }
+  const leaderboard = <aside className={`leaderboard leaderboard-drawer ${leaderboardOpen ? 'is-open' : ''}`}><button className="leaderboard-toggle" type="button" onClick={() => setLeaderboardOpen((open) => !open)} aria-label={leaderboardOpen ? 'Zwiń ranking' : 'Pokaż ranking'} aria-expanded={leaderboardOpen}>{leaderboardOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}</button><header>Ranking</header><div>{DEMO_PLAYERS.map((item) => <div className="leader-row" key={item.id} style={{ '--player-color': item.color } as CSSProperties}><i>{item.name.charAt(0)}</i><div><strong title={item.name}>{item.name}</strong><small>{item.balance.toLocaleString('pl-PL')} PLN</small></div></div>)}</div></aside>
   if (!hydrated) return <main className="start-screen"><div className="stage-rays" /></main>
   if (showStart) return <main className="start-screen"><div className="stage-rays" /><section><div className="start-qr"><img src={startQrUrl} alt={`Kod QR prowadzący do ${playUrl}`} /></div><button type="button" onClick={startGame}>Rozpocznij grę <span>→</span></button></section></main>
-  if (showCategory) return <main className="category-screen"><aside className="leaderboard"><header>Ranking</header><div>{DEMO_PLAYERS.map((item) => <div className="leader-row" key={item.name} style={{ '--player-color': item.color } as CSSProperties}><i>{item.name.charAt(0)}</i><div><strong title={item.name}>{item.name}</strong><small>{item.balance.toLocaleString('pl-PL')} PLN</small></div></div>)}</div></aside><section className="category-stage"><p>Wybierz kategorię</p><h1>Na co dziś stawiamy?</h1><div className={`category-ring ${categoryPhase === 'drawing' ? 'is-drawing' : ''}`}><svg className="ring-arcs" viewBox="0 0 100 100" aria-hidden="true">{categoryOptions.map((category, index) => <g key={category.id} transform={`rotate(${index * 120 - 90} 50 50)`}><circle className={`category-arc-track ${focusedCategory === index ? 'focused' : ''} ${winningCategory === index ? 'winner' : ''}`} cx="50" cy="50" r="43" pathLength="100" /><circle className={`category-arc-fill ${votes[index] > 0 ? 'has-votes' : ''} ${focusedCategory === index ? 'focused' : ''} ${winningCategory === index ? 'winner' : ''}`} style={{ '--category-color': CATEGORY_COLORS[index] } as CSSProperties} cx="50" cy="50" r="43" pathLength="100" /></g>)}</svg>{categoryOptions.map((category, index) => <button key={category.id} type="button" disabled={categoryPhase !== 'voting'} onClick={() => castVote(index)} className={`category-option option-${index} ${myVote === index ? 'my-vote' : ''}`}><span>{category.icon}</span><strong>{category.name}</strong><small>{votes[index]} {votes[index] === 1 ? 'głos' : 'głosów'}</small></button>)}<div className="ring-center">{categoryPhase === 'selected' ? <button className="start-question" type="button" onClick={startQuestion}><strong>Zaczynamy</strong><span>→</span></button> : <><strong>{categoryPhase === 'voting' ? categorySeconds : '•'}</strong><span>{categoryPhase === 'voting' ? 'sekund' : 'losowanie'}</span></>}</div></div></section></main>
+  if (showCategory) return <main className="category-screen">{leaderboard}<section className="category-stage"><p>Wybierz kategorię</p><h1>Na co dziś stawiamy?</h1><div className={`category-ring ${categoryPhase === 'drawing' ? 'is-drawing' : ''}`}><svg className="ring-arcs" viewBox="0 0 100 100" aria-hidden="true">{categoryOptions.map((category, index) => <g key={category.id} transform={`rotate(${index * 120 - 90} 50 50)`}><circle className={`category-arc-track ${focusedCategory === index ? 'focused' : ''} ${winningCategory === index ? 'winner' : ''}`} cx="50" cy="50" r="43" pathLength="100" /><circle className={`category-arc-fill ${votes[index] > 0 ? 'has-votes' : ''} ${focusedCategory === index ? 'focused' : ''} ${winningCategory === index ? 'winner' : ''}`} style={{ '--category-color': CATEGORY_COLORS[index] } as CSSProperties} cx="50" cy="50" r="43" pathLength="100" /></g>)}</svg>{categoryOptions.map((category, index) => <button key={category.id} type="button" disabled={categoryPhase !== 'voting'} onClick={() => castVote(index)} className={`category-option option-${index} ${myVote === index ? 'my-vote' : ''}`}><span>{category.icon}</span><strong>{category.name}</strong><small>{votes[index]} {votes[index] === 1 ? 'głos' : 'głosów'}</small></button>)}<div className="ring-center">{categoryPhase === 'selected' ? <button className="start-question" type="button" onClick={startQuestion}><strong>Zaczynamy</strong><span>→</span></button> : <><strong>{categoryPhase === 'voting' ? categorySeconds : '•'}</strong><span>{categoryPhase === 'voting' ? 'sekund' : 'losowanie'}</span></>}</div></div></section></main>
   return <main className={`question-screen phase-${phase}`}><div className="stage-rays" />
     {phase === 'betting' && <div className="betting-progress" style={{ transform: `scaleX(${secondsLeft / 60})` }} />}
     {phase === 'review' && <div className="review-progress" />}
     {phase === 'result' && <button className="next-question" type="button" onClick={nextQuestion}>NASTĘPNE PYTANIE <span>→</span></button>}
-    <aside className="leaderboard"><header>Ranking</header><div>{DEMO_PLAYERS.map((item) => <div className="leader-row" key={item.name} style={{ '--player-color': item.color } as CSSProperties}><i>{item.name.charAt(0)}</i><div><strong title={item.name}>{item.name}</strong><small>{item.balance.toLocaleString('pl-PL')} PLN</small></div></div>)}</div></aside>
+    {leaderboard}
     <section className="question-stage"><div className="question-banner"><span>{String(roundNumber || 1).padStart(2, '0')}</span><h1>{activeQuestion.question}</h1></div><div className="trapdoors">{questionAnswers.map((answer, index) => <div className={`answer-station ${openedDoors.has(index) ? 'is-open' : ''} ${answer.correct ? 'is-correct' : 'is-wrong'}`} key={answer.label}>
       <div className="answer-display"><span>{String.fromCharCode(65 + index)}</span><strong>{answer.label}</strong><b>{answer.share}%</b></div>
       <button className="trapdoor" type="button" onClick={() => setOpenedDoors((current) => { const next = new Set(current); if (next.has(index)) next.delete(index); else next.add(index); return next })} aria-label={`${openedDoors.has(index) ? 'Zamknij' : 'Otwórz'} klapę odpowiedzi ${answer.label}`}><div className="door-money" aria-hidden="true" style={{ '--pile-height': `${10 + answer.share * 1.15}px` } as CSSProperties}><span /><span /><span /><span /></div><span className="door-hinge left" /><span className="door-hinge right" /><span className="door-edge" /></button>

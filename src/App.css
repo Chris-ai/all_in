@@ -76,7 +76,6 @@
 .mobile-confirmed > div { width: 72px; height: 72px; margin: 0 auto 23px; display: grid; place-items: center; border: 1px solid #ffe18a; border-radius: 50%; color: #211106; background: var(--lime); font-size: 31px; box-shadow: 0 0 30px rgba(255,199,52,.28); }
 .mobile-waiting { width: 170px; height: 3px; margin: 35px auto 0; display: block; overflow: hidden; background: #302750; }
 .mobile-waiting i { width: 40%; height: 100%; display: block; background: var(--lime); animation: wait 1.5s ease-in-out infinite; }
-.phone-progress { position: fixed; z-index: 30; top: 0; left: 0; width: 100%; height: 6px; transform-origin: left; background: linear-gradient(90deg, #21d9ff, #7657ff); box-shadow: 0 0 15px rgba(55,123,255,.65); transition: transform 1s linear; }
 .mobile-question { padding-top: 70px; }
 .mobile-question > section { margin-top: 35px; }
 .mobile-question h2 { margin: 10px 0 24px; font: 700 31px/1.05 'Barlow Condensed', sans-serif; }
@@ -87,6 +86,19 @@
 .mobile-answers article > div:first-child strong { font: 700 19px/1 'Barlow Condensed', sans-serif; text-transform: uppercase; }
 .mobile-submit-bet { margin-top: 18px; justify-content: center; }
 .mobile-submit-bet:disabled { cursor: not-allowed; filter: grayscale(.45); opacity: .68; }
+.mobile-results { overflow-y: auto; padding-top: 70px; }
+.mobile-results > section { margin: 25px auto; }
+.mobile-results-heading { text-align: center; }
+.mobile-results-heading h1 { margin-bottom: 10px; font-size: clamp(38px, 12vw, 56px); }
+.mobile-results-heading p { margin: 0 0 24px; color: #aaa2ba; font-size: 13px; }
+.mobile-ranking { display: grid; gap: 8px; }
+.mobile-ranking > div { --player-color: #7657ff; min-height: 58px; display: grid; grid-template-columns: 22px 42px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--player-color), transparent 65%); border-radius: 16px; background: linear-gradient(90deg, color-mix(in srgb, var(--player-color), #130d35 76%), rgba(15,11,45,.72)); transition: transform .35s ease, border-color .35s ease; }
+.mobile-ranking > div.is-me { border-color: var(--player-color); transform: scale(1.025); }
+.mobile-ranking > div > span { color: #9186aa; font: 700 12px/1 'Barlow Condensed', sans-serif; text-align: center; }
+.mobile-ranking > div > i { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: #100b25; background: var(--player-color); font: normal 800 14px/1 'Inter', sans-serif; box-shadow: 0 0 13px color-mix(in srgb, var(--player-color), transparent 48%); }
+.mobile-ranking > div > strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.mobile-ranking > div > b { color: var(--lime); font: 800 16px/1 'Barlow Condensed', sans-serif; white-space: nowrap; }
+.mobile-ranking > div > b small { color: #8f86a5; font-size: 7px; }
 .bet-control { display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; gap: 8px; margin-top: 11px; }
 .bet-control button { height: 38px; border: 1px solid #66549c; border-radius: 9px; color: white; background: #251b57; font-size: 24px; }
 .bet-control button:disabled { opacity: .25; cursor: default; }
@@ -152,6 +164,7 @@
 .is-correct .answer-display { border-color: #6a78ff; }
 @keyframes wrong-flash { 0%, 35% { filter: brightness(1); } 18%, 52% { filter: brightness(1.75); } 100% { filter: brightness(.68) saturate(.7); } }
 .door-money { --pile-height: 35px; position: absolute; inset: 8px 13px 13px; display: flex; align-items: flex-end; justify-content: space-evenly; gap: 7px; overflow: visible; }
+.phase-betting .door-money, .phase-locked .door-money { visibility: hidden; opacity: 0; }
 .door-money > span { width: 20%; max-width: 48px; height: var(--pile-height); position: relative; border: 1px solid #d7ba56; border-radius: 3px 3px 1px 1px; background: repeating-linear-gradient(to bottom, #fff2a6 0 4px, #b59a39 5px 6px); box-shadow: 0 3px 0 #826d27, 0 6px 0 #d9bb57, 0 9px 0 #756321, 0 12px 9px rgba(0,0,0,.5); transform: rotate(-3deg); }
 .door-money > span::after { content: ''; position: absolute; width: 5px; top: -1px; bottom: -1px; left: 50%; transform: translateX(-50%); background: #b92d3e; box-shadow: inset 1px 0 rgba(255,255,255,.28); }
 .door-money > span:nth-child(2) { height: calc(var(--pile-height) * .78); transform: rotate(2deg); }
@@ -174,6 +187,11 @@
 .next-question span { margin-left: 14px; font-size: 17px; }
 @keyframes next-in { from { opacity: 0; transform: translateX(25px); } }
 .leaderboard { width: 225px; position: fixed; z-index: 8; left: 18px; top: 50%; transform: translateY(-50%); }
+.leaderboard-drawer { left: 0; width: 267px; min-height: 92px; padding: 18px 50px 18px 14px; border: 1px solid rgba(124,103,201,.35); border-left: 0; border-radius: 0 22px 22px 0; background: rgba(9,7,29,.88); box-shadow: 15px 20px 50px rgba(0,0,0,.34); backdrop-filter: blur(13px); transform: translate(calc(-100% + 42px), -50%); transition: transform .42s cubic-bezier(.2,.8,.2,1); }
+.leaderboard-drawer.is-open { transform: translate(0, -50%); }
+.leaderboard-toggle { width: 42px; position: absolute; inset: 0 0 0 auto; display: grid; place-items: center; border: 0; border-left: 1px solid rgba(124,103,201,.28); border-radius: 0 21px 21px 0; color: #d8d0ec; background: linear-gradient(90deg, rgba(69,47,139,.18), rgba(72,52,150,.48)); cursor: pointer; }
+.leaderboard-toggle:hover { color: white; background: rgba(89,66,177,.55); }
+.leaderboard-toggle svg { width: 21px; height: 21px; }
 .leaderboard:has(> div:empty) { display: none; }
 .leaderboard header { padding: 0 8px 12px; color: #c7bedc; font: 700 15px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; }
 .leader-row { --player-color: #8a76da; min-height: 52px; position: relative; display: grid; grid-template-columns: 38px minmax(0,1fr); gap: 10px; align-items: center; margin: 4px 0; padding: 6px 18px 6px 7px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--player-color), transparent 72%); border-right: 0; border-radius: 22px 0 0 22px; background: linear-gradient(90deg, color-mix(in srgb, var(--player-color), #100b27 70%) 0, color-mix(in srgb, var(--player-color), transparent 82%) 52%, transparent 100%); mask-image: linear-gradient(90deg, #000 0 72%, transparent 100%); transition: transform .2s, filter .2s; }
