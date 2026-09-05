@@ -10,6 +10,11 @@ alter table public.game_state add column if not exists round_number integer not 
 alter table public.game_state add column if not exists selected_category text;
 alter table public.game_state add column if not exists question_phase text not null default 'locked';
 alter table public.game_state add column if not exists betting_ends_at timestamptz;
+alter table public.game_state add column if not exists category_ends_at timestamptz;
+alter table public.game_state add column if not exists used_categories jsonb not null default '[]'::jsonb;
+alter table public.game_state add column if not exists current_question text;
+alter table public.game_state add column if not exists correct_answer_index integer;
+alter table public.game_state add column if not exists settled_round integer not null default 0;
 
 create table if not exists public.question_bets (
   id uuid primary key default gen_random_uuid(),
@@ -61,6 +66,42 @@ create policy "Players can place bets" on public.question_bets for insert to ano
 create policy "Players can update bets" on public.question_bets for update to anon, authenticated using (true) with check (
   exists (select 1 from public.game_state where id = 'main' and mode = 'question' and question_phase = 'betting' and betting_ends_at > now())
 );
+
+create or replace function public.settle_question_round()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  active_round integer;
+  correct_index integer;
+  changed_rows integer;
+begin
+  select round_number, correct_answer_index
+    into active_round, correct_index
+    from public.game_state
+    where id = 'main' and mode = 'question' and question_phase = 'review'
+    for update;
+
+  if active_round is null or correct_index is null then return; end if;
+
+  update public.game_state
+    set settled_round = active_round, question_phase = 'result', updated_at = now()
+    where id = 'main' and settled_round < active_round;
+  get diagnostics changed_rows = row_count;
+  if changed_rows = 0 then return; end if;
+
+  update public.players p
+    set balance = greatest(0, p.balance
+      + coalesce((qb.amounts ->> correct_index)::integer, 0)
+      - (select coalesce(sum(value::integer), 0) from jsonb_array_elements_text(qb.amounts) as value)
+      + coalesce((qb.amounts ->> correct_index)::integer, 0))
+    from public.question_bets qb
+    where qb.player_id = p.id and qb.round_number = active_round;
+end;
+$$;
+grant execute on function public.settle_question_round() to anon, authenticated;
 drop policy if exists "Category votes are visible" on public.category_votes;
 drop policy if exists "Players can vote for a category" on public.category_votes;
 drop policy if exists "Players can change their category vote" on public.category_votes;

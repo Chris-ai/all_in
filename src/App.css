@@ -93,6 +93,7 @@
 .bet-control b { text-align: center; color: white; font: 800 18px/1 'Barlow Condensed', sans-serif; }
 .bet-control b small { color: #8f86a5; font-size: 7px; }
 .start-question { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #ffe48e; border-radius: 50%; color: #251409; background: radial-gradient(circle at 38% 30%, #fff1ae, #f0ac22 58%, #ae5e08); box-shadow: inset 0 2px rgba(255,255,255,.65), 0 0 25px rgba(255,187,40,.42); animation: start-ready 1s ease-in-out infinite alternate; }
+.ring-center .start-question { pointer-events: auto; cursor: pointer; }
 .start-question strong { color: #251409; font-size: clamp(16px, 2vw, 23px); text-transform: uppercase; }
 .start-question span { margin-top: 7px; color: #542d08; font-size: 18px; }
 @keyframes start-ready { to { transform: scale(1.045); box-shadow: inset 0 2px rgba(255,255,255,.7), 0 0 38px rgba(255,187,40,.62); } }
