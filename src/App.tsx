@@ -5,7 +5,7 @@ import './App.css'
 import gameData from './assets/data.json'
 
 type ScreenMode = 'registration' | 'game' | 'question'
-type Player = { id: string; name: string; color: string; balance: number; created_at: string }
+type Player = { id: string; name: string; color: string; balance: number; eliminated: boolean; created_at: string }
 type GameState = { mode: ScreenMode; category_options: CategoryId[]; round_number: number; selected_category: CategoryId | null; question_phase: RoundPhase; betting_ends_at: string | null; category_ends_at: string | null; used_categories: CategoryId[]; current_question: string | null; correct_answer_index: number | null; settled_round: number }
 type RoundPhase = 'betting' | 'locked' | 'review' | 'result'
 type QuestionBet = { player_id: string; round_number: number; amounts: number[] }
@@ -77,7 +77,7 @@ function MobilePlayerView() {
     if (!supabaseReady) { setRestoring(false); return }
     const lookup = savedId ? `id=eq.${encodeURIComponent(savedId)}` : deviceToken ? `device_token=eq.${encodeURIComponent(deviceToken)}` : ''
     if (!lookup) { setRestoring(false); return }
-    supabaseRequest<Player[]>(`players?${lookup}&select=id,name,color,balance,created_at`).then((rows) => {
+    supabaseRequest<Player[]>(`players?${lookup}&select=id,name,color,balance,eliminated,created_at`).then((rows) => {
       if (rows[0]) { setPlayer(rows[0]); localStorage.setItem(PLAYER_ID_KEY, rows[0].id) }
       else localStorage.removeItem(PLAYER_ID_KEY)
     }).catch(() => localStorage.removeItem(PLAYER_ID_KEY)).finally(() => setRestoring(false))
@@ -89,7 +89,7 @@ function MobilePlayerView() {
   }, [])
   useEffect(() => {
     if (!playerId || !supabaseReady) return
-    const refreshPlayer = () => supabaseRequest<Player[]>('players?select=id,name,color,balance,created_at&order=balance.desc').then((rows) => { setMobileRanking(rows); const ownPlayer = rows.find((item) => item.id === playerId); if (ownPlayer) setPlayer((current) => current?.balance === ownPlayer.balance ? current : ownPlayer) }).catch(() => undefined)
+    const refreshPlayer = () => supabaseRequest<Player[]>('players?select=id,name,color,balance,eliminated,created_at&order=balance.desc').then((rows) => { setMobileRanking(rows); const ownPlayer = rows.find((item) => item.id === playerId); if (ownPlayer) setPlayer((current) => current?.balance === ownPlayer.balance && current.eliminated === ownPlayer.eliminated ? current : ownPlayer) }).catch(() => undefined)
     refreshPlayer()
     const timer = window.setInterval(refreshPlayer, 1500); return () => window.clearInterval(timer)
   }, [playerId])
@@ -122,16 +122,17 @@ function MobilePlayerView() {
     try {
       let deviceToken = localStorage.getItem(PLAYER_DEVICE_KEY)
       if (!deviceToken) { deviceToken = crypto.randomUUID(); localStorage.setItem(PLAYER_DEVICE_KEY, deviceToken) }
-      const existing = await supabaseRequest<Player[]>(`players?device_token=eq.${encodeURIComponent(deviceToken)}&select=id,name,color,balance,created_at`)
-      const rows = existing.length ? existing : await supabaseRequest<Player[]>('players?select=id,name,color,balance,created_at', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ name: cleanName, device_token: deviceToken }) })
+      const existing = await supabaseRequest<Player[]>(`players?device_token=eq.${encodeURIComponent(deviceToken)}&select=id,name,color,balance,eliminated,created_at`)
+      const rows = existing.length ? existing : await supabaseRequest<Player[]>('players?select=id,name,color,balance,eliminated,created_at', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ name: cleanName, device_token: deviceToken }) })
       if (!rows[0]) throw new Error('Brak gracza'); localStorage.setItem(PLAYER_ID_KEY, rows[0].id); setPlayer(rows[0])
     } catch { setError('Nie udało się dołączyć. Spróbuj ponownie.') } finally { setBusy(false) }
   }
   const committed = phoneBets.reduce((sum, amount) => sum + amount, 0)
   const availableBalance = Math.max(0, (player?.balance ?? 1000000) - committed)
   function adjustPhoneBet(index: number, direction: -1 | 1) {
-    if (!betHydrated || questionPhase !== 'betting' || betSaved) return
+    if (!betHydrated || questionPhase !== 'betting') return
     setPhoneBets((current) => current.map((amount, answerIndex) => answerIndex === index ? Math.max(0, Math.min(amount + direction * 50000, amount + availableBalance)) : amount))
+    setBetSaved(false)
   }
   async function submitBet() {
     if (!player || !betHydrated || questionPhase !== 'betting' || committed <= 0 || betSaved) return
@@ -142,12 +143,13 @@ function MobilePlayerView() {
     } catch { setError('Nie udało się zapisać stawki. Spróbuj ponownie.') } finally { setBusy(false) }
   }
   if (restoring) return <main className="mobile-play"><div className="mobile-glow" /><section><div className="mobile-confirmed"><span className="mobile-waiting"><i /></span></div></section></main>
-  if (player && mode === 'game' && selectedCategoryId) { const chosen = ALL_CATEGORIES.find((category) => category.id === selectedCategoryId); return <main className="mobile-play"><div className="mobile-glow" /><div className="balance-notch"><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">WYLOSOWANA KATEGORIA</span><h1>{chosen?.name ?? selectedCategoryId}</h1><p>Pytanie pojawi się za chwilę.</p><span className="mobile-waiting"><i /></span></div></section></main> }
   if (!player) return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><section><span className="mobile-kicker">DOŁĄCZ DO GRY</span><h1>Jak masz na imię?</h1><p>Podaj nazwę, pod którą zobaczą Cię pozostali gracze.</p><form className="mobile-join" onSubmit={join}><label htmlFor="join-name">Twoje imię lub nazwa</label><input id="join-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={32} placeholder="np. Krzysiek" autoFocus /><button className="primary-button" disabled={busy} type="submit">{busy ? 'Dołączanie…' : 'Dołączam'} <span>→</span></button></form>{error && <p className="form-message">{error}</p>}</section></main>
+  if (player.eliminated) return <main className="mobile-play mobile-results"><div className="mobile-glow" /><section><div className="mobile-results-heading"><h1>Ranking</h1></div><div className="mobile-ranking">{mobileRanking.map((item, index) => <div key={item.id} className={item.id === player.id ? 'is-me' : ''} style={{ '--player-color': item.color } as CSSProperties}><span>{index + 1}</span><i>{item.name.charAt(0)}</i><strong>{item.name}</strong><b>{item.balance.toLocaleString('pl-PL')} <small>PLN</small></b></div>)}</div></section></main>
+  if (mode === 'game' && selectedCategoryId) { const chosen = ALL_CATEGORIES.find((category) => category.id === selectedCategoryId); return <main className="mobile-play"><div className="mobile-glow" /><div className="balance-notch"><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">WYLOSOWANA KATEGORIA</span><h1>{chosen?.name ?? selectedCategoryId}</h1><p>Pytanie pojawi się za chwilę.</p><span className="mobile-waiting"><i /></span></div></section></main> }
   if (mode === 'registration') return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><div className="balance-notch"><span>SALDO</span><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-confirmed"><div style={{ background: player.color }}>{player.name.charAt(0)}</div><span className="mobile-kicker">JESTEŚ W GRZE</span><h1>{player.name}</h1><p>Gra niedługo się zacznie…</p><span className="mobile-waiting"><i /></span></div></section></main>
-  if (mode === 'question' && questionPhase !== 'betting') return <main className="mobile-play mobile-results"><div className="mobile-glow" /><div className="balance-notch"><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><div className="mobile-results-heading"><span className="mobile-kicker">STAWKI ZAMKNIĘTE</span><h1>Ranking na żywo</h1><p>Saldo zmieni się automatycznie po odsłonięciu wyniku.</p></div><div className="mobile-ranking">{mobileRanking.map((item, index) => <div key={item.id} className={item.id === player.id ? 'is-me' : ''} style={{ '--player-color': item.color } as CSSProperties}><span>{index + 1}</span><i>{item.name.charAt(0)}</i><strong>{item.name}</strong><b>{item.balance.toLocaleString('pl-PL')} <small>PLN</small></b></div>)}</div><span className="mobile-waiting"><i /></span></section></main>
-  if (mode === 'question') return <main className="mobile-play mobile-question"><div className="balance-notch"><span>DOSTĘPNE</span><strong>{availableBalance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><h2>{activeQuestion.question}</h2><div className="mobile-answers">{activeQuestion.answers.map((answer, index) => <article key={answer.id}><div><span>{answer.id}</span><strong>{answer.text}</strong></div><div className="bet-control"><button type="button" onClick={() => adjustPhoneBet(index, -1)} disabled={!betHydrated || betSaved || phoneBets[index] === 0}>−</button><b>{phoneBets[index].toLocaleString('pl-PL')} <small>PLN</small></b><button type="button" onClick={() => adjustPhoneBet(index, 1)} disabled={!betHydrated || betSaved || availableBalance < 50000}>+</button></div></article>)}</div><button className="primary-button mobile-submit-bet" type="button" onClick={submitBet} disabled={!betHydrated || busy || betSaved || committed === 0}>{!betHydrated ? 'Przygotowanie…' : betSaved ? 'Stawka zapisana ✓' : busy ? 'Zapisywanie…' : 'Postaw'}</button>{error && <p className="form-message">{error}</p>}</section></main>
-  return <main className="mobile-play"><div className="mobile-glow" /><div className="mobile-game-mark">ALL IN</div><div className="balance-notch"><span>SALDO</span><strong>{player.balance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section>{selected === null ? <><span className="mobile-kicker">WYBÓR KATEGORII</span><h1>Na co oddajesz głos?</h1><p>Wybierz jedną kategorię. Po zatwierdzeniu nie możesz zmienić decyzji.</p><div className="mobile-categories">{options.map((category, index) => <button key={category.id} type="button" onClick={() => setSelectedVote({ round: roundNumber, index })}><strong>{category.name}</strong><i>→</i></button>)}</div></> : <div className="mobile-confirmed"><div>✓</div><span className="mobile-kicker">GŁOS ODDANY</span><h1>{options[selected].name}</h1><p>Czekamy na pozostałych graczy i wynik losowania.</p><span className="mobile-waiting"><i /></span></div>}</section></main>
+  if (mode === 'question' && questionPhase !== 'betting') return <main className="mobile-play mobile-results"><div className="mobile-glow" /><section><div className="mobile-results-heading"><h1>Ranking</h1></div><div className="mobile-ranking">{mobileRanking.map((item, index) => <div key={item.id} className={item.id === player.id ? 'is-me' : ''} style={{ '--player-color': item.color } as CSSProperties}><span>{index + 1}</span><i>{item.name.charAt(0)}</i><strong>{item.name}</strong><b>{item.balance.toLocaleString('pl-PL')} <small>PLN</small></b></div>)}</div></section></main>
+  if (mode === 'question') return <main className="mobile-play mobile-question"><div className="balance-notch"><span>DOSTĘPNE</span><strong>{availableBalance.toLocaleString('pl-PL')}</strong><small>PLN</small></div><section><h2>{activeQuestion.question}</h2><div className="mobile-answers">{activeQuestion.answers.map((answer, index) => <article key={answer.id}><div><span>{answer.id}</span><strong>{answer.text}</strong></div><div className="bet-control"><button type="button" onClick={() => adjustPhoneBet(index, -1)} disabled={!betHydrated || phoneBets[index] === 0}>−</button><b>{phoneBets[index].toLocaleString('pl-PL')} <small>PLN</small></b><button type="button" onClick={() => adjustPhoneBet(index, 1)} disabled={!betHydrated || availableBalance < 50000}>+</button></div></article>)}</div><button className="primary-button mobile-submit-bet" type="button" onClick={submitBet} disabled={!betHydrated || busy || betSaved || committed === 0}>{!betHydrated ? 'Przygotowanie…' : betSaved ? 'Stawka zapisana ✓' : busy ? 'Zapisywanie…' : 'Postaw'}</button>{error && <p className="form-message">{error}</p>}</section></main>
+  return <main className="mobile-play"><div className="mobile-glow" /><section>{selected === null ? <><h1>Wybierz kategorię</h1><div className="mobile-categories">{options.map((category, index) => <button key={category.id} type="button" onClick={() => setSelectedVote({ round: roundNumber, index })}><strong>{category.name}</strong><i>→</i></button>)}</div></> : <div className="mobile-confirmed"><div>✓</div><h1>{options[selected].name}</h1></div>}</section></main>
 }
 
 function PlayerView() {
@@ -191,7 +193,7 @@ function PlayerView() {
   const loadState = useCallback(async () => {
     if (!supabaseReady) return
     try {
-      const [people, states] = await Promise.all([supabaseRequest<Player[]>('players?select=id,name,color,balance,created_at&order=balance.desc'), supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,current_question,correct_answer_index,settled_round')])
+      const [people, states] = await Promise.all([supabaseRequest<Player[]>('players?select=id,name,color,balance,eliminated,created_at&order=balance.desc'), supabaseRequest<GameState[]>('game_state?id=eq.main&select=mode,category_options,round_number,selected_category,question_phase,betting_ends_at,category_ends_at,used_categories,current_question,correct_answer_index,settled_round')])
       setPlayers(people)
       const state = states[0]
       if (state) {
@@ -313,7 +315,7 @@ function PlayerView() {
     {phase === 'result' && <button className="next-question" type="button" onClick={nextQuestion}>NASTĘPNE PYTANIE <span>→</span></button>}
     {leaderboard}
     <section className="question-stage"><div className="question-banner"><span>{String(roundNumber || 1).padStart(2, '0')}</span><h1>{activeQuestion.question}</h1></div><div className="trapdoors">{questionAnswers.map((answer, index) => <div className={`answer-station ${openedDoors.has(index) ? 'is-open' : ''} ${answer.correct ? 'is-correct' : 'is-wrong'}`} key={answer.label}>
-      <div className="answer-display"><span>{String.fromCharCode(65 + index)}</span><strong>{answer.label}</strong><b>{answer.share}%</b></div>
+      <div className="answer-display"><span>{String.fromCharCode(65 + index)}</span><strong>{answer.label}</strong></div>
       <button className="trapdoor" type="button" onClick={() => setOpenedDoors((current) => { const next = new Set(current); if (next.has(index)) next.delete(index); else next.add(index); return next })} aria-label={`${openedDoors.has(index) ? 'Zamknij' : 'Otwórz'} klapę odpowiedzi ${answer.label}`}><div className="door-money" aria-hidden="true" style={{ '--pile-height': `${10 + answer.share * 1.15}px` } as CSSProperties}><span /><span /><span /><span /></div><span className="door-hinge left" /><span className="door-hinge right" /><span className="door-edge" /></button>
       <div className="stake-meter"><div className="meter-total">{answer.total.toLocaleString('pl-PL')} <small>PLN</small></div><div className="meter-track"><div className="meter-empty" /><div className="meter-stack" style={{ height: `${Math.max(18, answer.share * 2.15)}%` }}>{answer.bets.map((bet) => <span key={bet.name} style={{ background: bet.color, flex: bet.amount }} title={`${bet.name}: ${bet.amount.toLocaleString('pl-PL')} PLN`} />)}</div></div><div className="bet-list">{answer.bets.map((bet) => <div key={bet.name} title={`${bet.name}: ${bet.amount.toLocaleString('pl-PL')} PLN`}><i style={{ background: bet.color }} /><span>{bet.name}</span><b>{(bet.amount / 1000).toFixed(0)}k</b></div>)}</div></div>
     </div>)}</div></section>

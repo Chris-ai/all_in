@@ -89,8 +89,7 @@
 .mobile-results { overflow-y: auto; padding-top: 70px; }
 .mobile-results > section { margin: 25px auto; }
 .mobile-results-heading { text-align: center; }
-.mobile-results-heading h1 { margin-bottom: 10px; font-size: clamp(38px, 12vw, 56px); }
-.mobile-results-heading p { margin: 0 0 24px; color: #aaa2ba; font-size: 13px; }
+.mobile-results-heading h1 { margin-bottom: 24px; font-size: clamp(38px, 12vw, 56px); }
 .mobile-ranking { display: grid; gap: 8px; }
 .mobile-ranking > div { --player-color: #7657ff; min-height: 58px; display: grid; grid-template-columns: 22px 42px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--player-color), transparent 65%); border-radius: 16px; background: linear-gradient(90deg, color-mix(in srgb, var(--player-color), #130d35 76%), rgba(15,11,45,.72)); transition: transform .35s ease, border-color .35s ease; }
 .mobile-ranking > div.is-me { border-color: var(--player-color); transform: scale(1.025); }
@@ -155,7 +154,6 @@
 .answer-display::after { content: ''; position: absolute; inset: 5px; border: 1px solid rgba(103,222,255,.3); border-radius: 5px; pointer-events: none; }
 .answer-display > span { grid-row: 1 / 3; color: white; font: 800 35px/1 'Barlow Condensed', sans-serif; text-shadow: 0 0 9px #42baff; }
 .answer-display strong { overflow: hidden; color: white; font: 700 clamp(15px, 1.35vw, 21px)/1 'Barlow Condensed', sans-serif; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
-.answer-display b { color: #d9d2ff; font: 700 13px/1 'Barlow Condensed', sans-serif; }
 .trapdoor { height: clamp(112px, 15vh, 145px); position: relative; z-index: 2; margin: -13px 3px 19px; padding: 0; overflow: visible; border: 3px solid #ff7373; border-radius: 8px 8px 4px 4px; background: linear-gradient(155deg, #ff4d4d 0, #d81726 42%, #8c0716 76%, #570510 100%); box-shadow: inset 0 5px rgba(255,255,255,.32), inset 0 -18px rgba(73,0,10,.34), 0 8px 0 #500817, 0 15px 0 #250829, 0 28px 35px rgba(0,0,0,.72); transform: rotateX(48deg) translateZ(0); transform-origin: 50% 100%; transition: transform .78s cubic-bezier(.55,.02,.26,.98), filter .2s, box-shadow .78s; }
 .trapdoor:hover { filter: brightness(1.12); transform: rotateX(45deg) translateY(-4px); }
 .trapdoor::before { content: ''; position: absolute; inset: 7px; border: 1px solid rgba(255,226,182,.38); border-radius: 4px; box-shadow: inset 0 0 13px rgba(64,0,7,.45); }

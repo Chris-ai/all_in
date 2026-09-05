@@ -3,6 +3,8 @@
   alter table public.players add column if not exists color text not null default ((array['#ff477e','#27d7ff','#ffd23f','#70e000','#b56cff','#ff8c42','#00e5a8','#ff5cdd'])[1 + floor(random() * 8)::int]);
   alter table public.players add column if not exists balance integer not null default 1000000 check (balance >= 0);
   alter table public.players add column if not exists device_token uuid unique;
+  alter table public.players add column if not exists eliminated boolean not null default false;
+  update public.players set eliminated = true where balance = 0;
   create table if not exists public.game_state (id text primary key, mode text not null default 'registration' check (mode in ('registration', 'game')), updated_at timestamptz not null default now());
 alter table public.game_state drop constraint if exists game_state_mode_check;
 alter table public.game_state add column if not exists category_options jsonb not null default '[]'::jsonb;
@@ -96,7 +98,11 @@ begin
     set balance = greatest(0, p.balance
       + coalesce((qb.amounts ->> correct_index)::integer, 0)
       - (select coalesce(sum(value::integer), 0) from jsonb_array_elements_text(qb.amounts) as value)
-      + coalesce((qb.amounts ->> correct_index)::integer, 0))
+      + coalesce((qb.amounts ->> correct_index)::integer, 0)),
+      eliminated = greatest(0, p.balance
+        + coalesce((qb.amounts ->> correct_index)::integer, 0)
+        - (select coalesce(sum(value::integer), 0) from jsonb_array_elements_text(qb.amounts) as value)
+        + coalesce((qb.amounts ->> correct_index)::integer, 0)) = 0
     from public.question_bets qb
     where qb.player_id = p.id and qb.round_number = active_round;
 end;
