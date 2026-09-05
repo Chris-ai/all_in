@@ -1,91 +1,6 @@
 {
   "categories": [
     {
-      "id": "film-tv",
-      "name": "Film i seriale",
-      "icon": "🎬",
-      "questions": [
-        {
-          "id": "film-tv-03",
-          "question": "W której części Harry'ego Pottera po raz pierwszy pojawił się motyw muzyczny „Hedwig's Theme”?",
-          "answers": [
-            {
-              "id": "A",
-              "text": "Kamień Filozoficzny",
-              "correct": true
-            },
-            {
-              "id": "B",
-              "text": "Komnata Tajemnic",
-              "correct": false
-            },
-            {
-              "id": "C",
-              "text": "Więzień Azkabanu",
-              "correct": false
-            },
-            {
-              "id": "D",
-              "text": "Zakon Feniksa",
-              "correct": false
-            }
-          ]
-        },
-        {
-          "id": "film-tv-01",
-          "question": "Który z tych filmów miał premierę najwcześniej?",
-          "answers": [
-            {
-              "id": "A",
-              "text": "Shrek",
-              "correct": true
-            },
-            {
-              "id": "B",
-              "text": "Epoka lodowcowa",
-              "correct": false
-            },
-            {
-              "id": "C",
-              "text": "Gdzie jest Nemo",
-              "correct": false
-            },
-            {
-              "id": "D",
-              "text": "Madagaskar",
-              "correct": false
-            }
-          ]
-        },
-        {
-          "id": "film-tv-02",
-          "question": "Który film Disneya jako pierwszy film animowany w historii otrzymał nominację do Oscara za najlepszy film?",
-          "answers": [
-            {
-              "id": "A",
-              "text": "Król Lew",
-              "correct": false
-            },
-            {
-              "id": "B",
-              "text": "Piękna i Bestia",
-              "correct": true
-            },
-            {
-              "id": "C",
-              "text": "Aladyn",
-              "correct": false
-            },
-            {
-              "id": "D",
-              "text": "Mała Syrenka",
-              "correct": false
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "music",
       "name": "Muzyka",
       "icon": "🎵",
@@ -144,27 +59,27 @@
         },
         {
           "id": "music-03",
-          "question": "Który z tych utworów w oryginalnej wersji albumowej trwa najdłużej?",
+          "question": "Jak naprawdę nazywa się Lady Gaga?",
           "answers": [
             {
               "id": "A",
-              "text": "Queen — Bohemian Rhapsody",
-              "correct": false
+              "text": "Stefani Germanotta",
+              "correct": true
             },
             {
               "id": "B",
-              "text": "Eagles — Hotel California",
+              "text": "Stephanie Garrison",
               "correct": false
             },
             {
               "id": "C",
-              "text": "Led Zeppelin — Stairway to Heaven",
+              "text": "Gabriella Stefano",
               "correct": false
             },
             {
               "id": "D",
-              "text": "Guns N' Roses — November Rain",
-              "correct": true
+              "text": "Angelina Moretti",
+              "correct": false
             }
           ]
         }
@@ -175,32 +90,6 @@
       "name": "Świat",
       "icon": "🌍",
       "questions": [
-        {
-          "id": "world-01",
-          "question": "Ilu mieszkańców ma Hiszpania według danych z 2026 roku?",
-          "answers": [
-            {
-              "id": "A",
-              "text": "Mniej niż 35 mln",
-              "correct": false
-            },
-            {
-              "id": "B",
-              "text": "35–45 mln",
-              "correct": false
-            },
-            {
-              "id": "C",
-              "text": "45–55 mln",
-              "correct": true
-            },
-            {
-              "id": "D",
-              "text": "Ponad 55 mln",
-              "correct": false
-            }
-          ]
-        },
         {
           "id": "world-02",
           "question": "Która z tych stolic leży najbardziej na północ?",
@@ -229,27 +118,53 @@
         },
         {
           "id": "world-03",
-          "question": "Które państwo ma najwięcej standardowych stref czasowych, jeśli uwzględnimy jego terytoria zamorskie i zależne?",
+          "question": "Która z tych pustyń jest największa na świecie?",
           "answers": [
             {
               "id": "A",
-              "text": "Rosja",
+              "text": "Sahara",
               "correct": false
             },
             {
               "id": "B",
-              "text": "USA",
+              "text": "Gobi",
               "correct": false
             },
             {
               "id": "C",
-              "text": "Francja",
+              "text": "Antarktyda",
               "correct": true
             },
             {
               "id": "D",
-              "text": "Australia",
+              "text": "Pustynia Arabska",
               "correct": false
+            }
+          ]
+        },
+        {
+          "id": "world-04",
+          "question": "Które z tych państw jest najmniejsze pod względem powierzchni?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Monako",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "San Marino",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Liechtenstein",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Watykan",
+              "correct": true
             }
           ]
         }
@@ -431,58 +346,6 @@
       "icon": "🎮",
       "questions": [
         {
-          "id": "games-popculture-01",
-          "question": "Jak nazywa się Pokémon Asha, który słynie z elektrycznych ataków?",
-          "answers": [
-            {
-              "id": "A",
-              "text": "Pikachu",
-              "correct": true
-            },
-            {
-              "id": "B",
-              "text": "Raichu",
-              "correct": false
-            },
-            {
-              "id": "C",
-              "text": "Pichu",
-              "correct": false
-            },
-            {
-              "id": "D",
-              "text": "Pachirisu",
-              "correct": false
-            }
-          ]
-        },
-        {
-          "id": "games-popculture-02",
-          "question": "Która z tych gier ukazała się najwcześniej?",
-          "answers": [
-            {
-              "id": "A",
-              "text": "Minecraft",
-              "correct": false
-            },
-            {
-              "id": "B",
-              "text": "Fortnite",
-              "correct": false
-            },
-            {
-              "id": "C",
-              "text": "World of Warcraft",
-              "correct": true
-            },
-            {
-              "id": "D",
-              "text": "League of Legends",
-              "correct": false
-            }
-          ]
-        },
-        {
           "id": "games-popculture-03",
           "question": "Która z tych gier sprzedała się w największej liczbie egzemplarzy na świecie?",
           "answers": [
@@ -507,6 +370,58 @@
               "correct": false
             }
           ]
+        },
+        {
+          "id": "games-popculture-04",
+          "question": "W którym roku po raz pierwszy wydano konsolę PlayStation?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "1992",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "1994",
+              "correct": true
+            },
+            {
+              "id": "C",
+              "text": "1996",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "1998",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "games-popculture-05",
+          "question": "Jak pierwotnie nazywał się Mario w grze Donkey Kong?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Jumpman",
+              "correct": true
+            },
+            {
+              "id": "B",
+              "text": "Mr. Plumber",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "Superman",
+              "correct": false
+            },
+            {
+              "id": "D",
+              "text": "Redman",
+              "correct": false
+            }
+          ]
         }
       ]
     },
@@ -515,32 +430,6 @@
       "name": "Internet",
       "icon": "🌐",
       "questions": [
-        {
-          "id": "internet-01",
-          "question": "Która z tych usług pojawiła się najwcześniej?",
-          "answers": [
-            {
-              "id": "A",
-              "text": "Facebook",
-              "correct": true
-            },
-            {
-              "id": "B",
-              "text": "YouTube",
-              "correct": false
-            },
-            {
-              "id": "C",
-              "text": "Spotify",
-              "correct": false
-            },
-            {
-              "id": "D",
-              "text": "Instagram",
-              "correct": false
-            }
-          ]
-        },
         {
           "id": "internet-02",
           "question": "Do czego pierwotnie powstała sieć ARPANET, uznawana za poprzednika Internetu?",
@@ -590,6 +479,32 @@
               "id": "D",
               "text": "Ponad 3 mln",
               "correct": true
+            }
+          ]
+        },
+        {
+          "id": "internet-04",
+          "question": "Jak brzmiał pierwszy tweet opublikowany na Twitterze?",
+          "answers": [
+            {
+              "id": "A",
+              "text": "Hello, Twitter!",
+              "correct": false
+            },
+            {
+              "id": "B",
+              "text": "Welcome to twttr",
+              "correct": false
+            },
+            {
+              "id": "C",
+              "text": "just setting up my twttr",
+              "correct": true
+            },
+            {
+              "id": "D",
+              "text": "my first tweet",
+              "correct": false
             }
           ]
         }
